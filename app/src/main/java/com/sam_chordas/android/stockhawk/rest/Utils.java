@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.service.InvalidStockSymbolException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,18 +35,11 @@ public class Utils {
           jsonObject = jsonObject.getJSONObject("results")
               .getJSONObject("quote");
 
-          // todo: validate results - make sure non-null values returned
-          // if they are put up message
-
+          // validate results - assume that if 'Bid' is 'null' symbol is invalid
           if (jsonObject.getString("Bid") == "null") {
-            String stockSymbol = jsonObject.getString("symbol");
-            String msg = "Cannot find stock symbol ";
-            if (stockSymbol != "null")
-                msg += stockSymbol;
-              // todo throw custom exception
-            throw new JSONException(msg);
+            String msg = "Cannot find stock symbol: " + jsonObject.getString("symbol");
+            throw new InvalidStockSymbolException(msg);
           }
-
           batchOperations.add(buildBatchOperation(jsonObject));
         } else{
           resultsArray = jsonObject.getJSONObject("results").getJSONArray("quote");

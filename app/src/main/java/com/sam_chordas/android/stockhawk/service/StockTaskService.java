@@ -1,13 +1,15 @@
 package com.sam_chordas.android.stockhawk.service;
 
-import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
@@ -22,7 +24,6 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 
 /**
  * Created by sam_chordas on 9/30/15.
@@ -57,6 +58,7 @@ public class StockTaskService extends GcmTaskService{
     if (mContext == null){
       mContext = this;
     }
+
     StringBuilder urlStringBuilder = new StringBuilder();
     try{
       // Base URL for the Yahoo query
@@ -66,11 +68,15 @@ public class StockTaskService extends GcmTaskService{
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     }
+
+
     if (params.getTag().equals("init") || params.getTag().equals("periodic")){
       isUpdate = true;
       initQueryCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
           new String[] { "Distinct " + QuoteColumns.SYMBOL }, null,
           null, null);
+
+      // init
       if (initQueryCursor.getCount() == 0 || initQueryCursor == null){
         // Init task. Populates DB with quotes for the symbols seen below
         try {
@@ -79,6 +85,8 @@ public class StockTaskService extends GcmTaskService{
         } catch (UnsupportedEncodingException e) {
           e.printStackTrace();
         }
+
+      // periodic
       } else if (initQueryCursor != null){
         DatabaseUtils.dumpCursor(initQueryCursor);
         initQueryCursor.moveToFirst();
@@ -94,6 +102,8 @@ public class StockTaskService extends GcmTaskService{
           e.printStackTrace();
         }
       }
+
+    // add
     } else if (params.getTag().equals("add")){
       isUpdate = false;
       // get symbol from params.getExtra and build query
@@ -104,6 +114,7 @@ public class StockTaskService extends GcmTaskService{
         e.printStackTrace();
       }
     }
+
     // finalize the URL for the API query.
     urlStringBuilder.append("&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables."
         + "org%2Falltableswithkeys&callback=");
@@ -125,15 +136,19 @@ public class StockTaskService extends GcmTaskService{
             mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
                 null, null);
           }
-
-          // todo: show message if stock symbol invalid
-          ArrayList<ContentProviderOperation> batchOperations;
-          batchOperations = Utils.quoteJsonToContentVals(getResponse);
-          if (!batchOperations.isEmpty()) {
-            mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY, batchOperations);
-          }
-        } catch (RemoteException | OperationApplicationException e){
+          mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY, Utils.quoteJsonToContentVals(getResponse));
+        } catch (RemoteException | OperationApplicationException | InvalidStockSymbolException e){
           Log.e(LOG_TAG, "Error applying batch insert", e);
+          // if invalid stock symbol show Toast to user
+          if (e instanceof InvalidStockSymbolException) {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+              @Override
+              public void run() {
+                Toast.makeText(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+              }
+            });
+          }
         }
       } catch (IOException e){
         e.printStackTrace();
