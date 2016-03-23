@@ -8,13 +8,10 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.db.chart.model.LineSet;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
@@ -107,9 +104,7 @@ public class StockTaskService extends GcmTaskService {
 
         String urlString;
         String getResponse;
-        ArrayList<Float> closingPrices;
-        LineSet chartValues;
-
+        ArrayList<HistoryData> stockHistory = null;
         int result = GcmNetworkManager.RESULT_FAILURE;
 
         if (urlStringBuilder != null) {
@@ -117,42 +112,33 @@ public class StockTaskService extends GcmTaskService {
             Log.d(TAG, "Query URL: " + urlString);
             try {
                 getResponse = fetchData(urlString);
-                chartValues = Utils.parseHistoryResults(getResponse);
-                // todo pass to activity
-                if (chartValues.size() > 0) {
+                stockHistory = Utils.parseHistoryResults(getResponse);
+                if (stockHistory.size() > 0) {
                     result = GcmNetworkManager.RESULT_SUCCESS;
                 }
-                else {
-                    // todo show error to user
-                }
-
-                // todo add exceptions to be handled
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
+        sendDetailResults(stockHistory, result);
         return result;
 
     }
 
-    public static final String DETAIL_RESULTS = "detail_results";
-    public static final String VALUES = "detail_values";
+    // todo move to details model
+    public static final String DETAIL_INTENT = "detail_intent";
+    public static final String DETAIL_VALUES = "detail_values";
+    public static final String DETAIL_RESULT = "detail_result";
 
-    private void sendDetailResults(LineSet values) {
-        Intent intent = new Intent(DETAIL_RESULTS);
-        intent.putExtra(VALUES, new Parcelable() {
-            @Override
-            public int describeContents() {
-                return 0;
-            }
+    //ArrayList<HistoryData> stockHistory = this.getIntent().getExtras().getParcelableArrayList(DETAIL_VALUES);
 
-            @Override
-            public void writeToParcel(Parcel dest, int flags) {
-
-            }
-        })
+    private void sendDetailResults(ArrayList<HistoryData> stockHistory, int resultCode) {
+        Intent intent = new Intent(DETAIL_INTENT);
+        intent.putExtra(DETAIL_RESULT, resultCode);
+        if (resultCode == GcmNetworkManager.RESULT_SUCCESS) {
+            intent.putParcelableArrayListExtra(DETAIL_VALUES, stockHistory);
+        }
+        mContext.sendBroadcast(intent);
     }
 
     private int handleQuoteQuery(TaskParams params) {

@@ -11,6 +11,11 @@ public class HistoryData implements Parcelable {
 
     public HistoryData() {}
 
+    public HistoryData(String label, float closingPrice) {
+        mLabel = label;
+        mClosingPrice = closingPrice;
+    }
+
     public HistoryData(Parcel in) {
         readFromParcel(in);
     }

@@ -3,9 +3,9 @@ package com.sam_chordas.android.stockhawk.rest;
 import android.content.ContentProviderOperation;
 import android.util.Log;
 
-import com.db.chart.model.LineSet;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.service.HistoryData;
 import com.sam_chordas.android.stockhawk.service.InvalidStockSymbolException;
 
 import org.json.JSONArray;
@@ -59,10 +59,10 @@ public class Utils {
         return batchOperations;
     }
 
-    public static LineSet parseHistoryResults(String JSON) {
+    public static ArrayList<HistoryData> parseHistoryResults(String JSON) {
         JSONObject jsonObject = null;
         JSONArray resultsArray = null;
-        LineSet chartValues = new LineSet();
+        ArrayList<HistoryData> stockHistory = new ArrayList<>();
 
         try {
             jsonObject = new JSONObject(JSON);
@@ -74,14 +74,9 @@ public class Utils {
                     if (resultsArray != null && resultsArray.length() != 0) {
                         for (int i = 0; i < resultsArray.length(); i++) {
                             jsonObject = resultsArray.getJSONObject(i);
-                            // todo: improve
                             String closingPrice = jsonObject.getString("Close");
-                            String dateLabel = jsonObject.getString("Date");
-                            String fValue = Utils.truncateBidPrice(closingPrice);
-                            float f = Float.parseFloat(fValue);
-                            chartValues.addPoint(dateLabel, f);
-
-                            Log.d(TAG, "Closing value: " + f);
+                            float closingPriceFloat = Float.parseFloat(Utils.truncateBidPrice(closingPrice));
+                            stockHistory.add(new HistoryData(jsonObject.getString("Date"), closingPriceFloat));
                         }
                     }
                 }
@@ -90,7 +85,7 @@ public class Utils {
             Log.e(TAG, "String to JSON failed: " + e);
         }
 
-        return chartValues;
+        return stockHistory;
     }
 
     public static String truncateBidPrice(String bidPrice) {
