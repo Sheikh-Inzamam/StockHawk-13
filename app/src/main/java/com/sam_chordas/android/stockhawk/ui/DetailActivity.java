@@ -1,9 +1,13 @@
 package com.sam_chordas.android.stockhawk.ui;
 
+import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Loader;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +18,8 @@ import com.db.chart.model.LineSet;
 import com.db.chart.view.LineChartView;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.data.QuoteColumns;
+import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.service.HistoryData;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
@@ -24,12 +30,15 @@ import java.util.ArrayList;
     handle
         check is connected
  */
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String TAG = DetailActivity.class.getSimpleName();
 
     private Intent mServiceIntent;
     private LineChartView mChartView;
+    private Cursor mCursor;
+    private static final int DETAILS_CURSOR_LOADER_ID = 0;
+    private String mStockSymbol;
 
     private BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
         @Override
@@ -107,17 +116,26 @@ public class DetailActivity extends AppCompatActivity {
         String symbol = intent.getStringExtra("symbol");
         Log.d(TAG, "symbol is: " + symbol);
 
+
+        mStockSymbol = symbol;
+
+        getLoaderManager().initLoader(DETAILS_CURSOR_LOADER_ID, null, this);
+
+        
         mServiceIntent = new Intent(this, StockIntentService.class);
         // todo add params for date range
         mServiceIntent.putExtra("tag", "details");
         mServiceIntent.putExtra("symbol", symbol);
         startService(mServiceIntent);
+
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         registerReceiver(mDataReceiver, new IntentFilter(StockTaskService.DETAIL_INTENT));
+        getLoaderManager().restartLoader(DETAILS_CURSOR_LOADER_ID, null, this);
     }
 
     @Override
@@ -126,16 +144,44 @@ public class DetailActivity extends AppCompatActivity {
         unregisterReceiver(mDataReceiver);
     }
 
-    /*
-    public static boolean isServiceRunning(String serviceClassName){
-        final ActivityManager activityManager = (ActivityManager) Application.getContext().getSystemService(Context.ACTIVITY_SERVICE);
-        final List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
-        for (RunningServiceInfo runningServiceInfo : services) {
-            if (runningServiceInfo.service.getClassName().equals(serviceClassName)){
-                return true;
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // This narrows the return to only the stocks that are most current.
+        // todo set up colums for details screen
+        return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
+                new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
+                        QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
+                QuoteColumns.ISCURRENT + " = ?",
+                new String[]{"1"},
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+        mCursor = data;
+
+        if (mCursor != null) {
+            Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
+                    new String[]{QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
+                            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
+                    QuoteColumns.SYMBOL + "= ?",
+                    new String[]{mStockSymbol}, null);
+            if (c.getCount() != 0) {
+                c.moveToFirst();
+                String symbol = c.getString(c.getColumnIndex(QuoteColumns.SYMBOL));
+                String price = c.getString(c.getColumnIndex(QuoteColumns.BIDPRICE));
+                String percentChange = c.getString(c.getColumnIndex(QuoteColumns.PERCENT_CHANGE));
+                int isUp = c.getInt(c.getColumnIndex(QuoteColumns.ISUP));
+                Log.d(TAG, "symbol is " + symbol);
             }
         }
-        return false;
     }
-*/
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+       // mCursorAdapter.swapCursor(null);
+    }
+
+
 }

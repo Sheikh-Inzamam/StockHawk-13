@@ -26,3 +26,4 @@ public class QuoteColumns {
   @DataType(DataType.Type.INTEGER) @NotNull
   public static final String ISCURRENT = "is_current";
 }
+// add here...

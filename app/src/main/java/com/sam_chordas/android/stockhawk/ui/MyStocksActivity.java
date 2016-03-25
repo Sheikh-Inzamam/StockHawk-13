@@ -89,9 +89,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                         Intent intent = new Intent(mContext, DetailActivity.class);
                         intent.putExtra("symbol", mCursorAdapter.getStockSymbol(position));
                         mContext.startActivity(intent);
-
-                        //String msg = "clicked on " + mCursorAdapter.getStockSymbol(position);
-                        // Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
                     }
                 }));
         recyclerView.setAdapter(mCursorAdapter);
@@ -224,6 +221,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
         mCursor = data;
+
     }
 
     @Override
