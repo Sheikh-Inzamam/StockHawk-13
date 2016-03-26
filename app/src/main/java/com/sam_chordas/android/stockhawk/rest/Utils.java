@@ -127,9 +127,63 @@ public class Utils {
                 builder.withValue(QuoteColumns.ISUP, 1);
             }
 
+            // new columns
+            builder.withValue(QuoteColumns.NAME, jsonObject.getString("Name"));
+            builder.withValue(QuoteColumns.OPEN_PRICE, jsonObject.getString("Open"));
+            builder.withValue(QuoteColumns.DAYSHIGH, jsonObject.getString("DaysHigh"));
+            builder.withValue(QuoteColumns.DAYSLOW, jsonObject.getString("DaysLow"));
+            builder.withValue(QuoteColumns.DIV_YIELD, jsonObject.getString("DividendYield"));
+            builder.withValue(QuoteColumns.PE_RATIO, jsonObject.getString("PERatio"));
+            builder.withValue(QuoteColumns.MARKET_CAP, jsonObject.getString("MarketCapitalization"));
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return builder.build();
+    }
+
+    public static ContentProviderOperation buildBatchOperation0(JSONObject jsonObject) {
+        ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
+                QuoteProvider.Quotes.CONTENT_URI);
+        try {
+            String change = jsonObject.getString("Change");
+            builder.withValue(QuoteColumns.SYMBOL, jsonObject.getString("symbol"));
+            builder.withValue(QuoteColumns.BIDPRICE, truncateBidPrice(jsonObject.getString("Bid")));
+            builder.withValue(QuoteColumns.PERCENT_CHANGE, truncateChange(
+                    jsonObject.getString("ChangeinPercent"), true));
+            builder.withValue(QuoteColumns.CHANGE, truncateChange(change, false));
+            builder.withValue(QuoteColumns.ISCURRENT, 1);
+            if (change.charAt(0) == '-') {
+                builder.withValue(QuoteColumns.ISUP, 0);
+            } else {
+                builder.withValue(QuoteColumns.ISUP, 1);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return builder.build();
+    }
+
+// todo update
+
+    public static String[] getDbColumns() {
+        return new String[] {
+                QuoteColumns._ID,
+                QuoteColumns.BIDPRICE,
+                QuoteColumns.CHANGE,
+                //  QuoteColumns.CREATED,
+//                QuoteColumns.DAYSHIGH,
+//                QuoteColumns.DAYSLOW,
+//                QuoteColumns.DIV_YIELD,
+                //   QuoteColumns.ISCURRENT,
+                QuoteColumns.ISUP,
+//                QuoteColumns.MARKET_CAP,
+//                QuoteColumns.NAME,
+//                QuoteColumns.OPEN_PRICE,
+//                QuoteColumns.PE_RATIO,
+                QuoteColumns.PERCENT_CHANGE,
+                QuoteColumns.SYMBOL
+        };
     }
 }

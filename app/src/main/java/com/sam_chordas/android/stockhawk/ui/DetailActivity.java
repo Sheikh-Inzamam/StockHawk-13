@@ -121,7 +121,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
         getLoaderManager().initLoader(DETAILS_CURSOR_LOADER_ID, null, this);
 
-        
+
         mServiceIntent = new Intent(this, StockIntentService.class);
         // todo add params for date range
         mServiceIntent.putExtra("tag", "details");
@@ -163,17 +163,34 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
         if (mCursor != null) {
             Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
-                    new String[]{QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
-                            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
+             //       QuoteColumns.COLUMNS,
+                   new String[]{QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
+                            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},//, QuoteColumns.PE_RATIO},
+
                     QuoteColumns.SYMBOL + "= ?",
                     new String[]{mStockSymbol}, null);
+
             if (c.getCount() != 0) {
                 c.moveToFirst();
+
+                String[] columnNames = c.getColumnNames();
+                for (String name:columnNames) {
+                    int index = c.getColumnIndex(name);
+                    int type = c.getType(index);
+                    // ignore non-string data
+                    if (type == Cursor.FIELD_TYPE_STRING) {
+                        String value = c.getString(index);
+                        Log.d(TAG, "column: " + name + " value: " + value);
+                    }
+                }
+
+/*
                 String symbol = c.getString(c.getColumnIndex(QuoteColumns.SYMBOL));
                 String price = c.getString(c.getColumnIndex(QuoteColumns.BIDPRICE));
                 String percentChange = c.getString(c.getColumnIndex(QuoteColumns.PERCENT_CHANGE));
                 int isUp = c.getInt(c.getColumnIndex(QuoteColumns.ISUP));
                 Log.d(TAG, "symbol is " + symbol);
+                */
             }
         }
     }
