@@ -25,6 +25,7 @@ import com.sam_chordas.android.stockhawk.service.HistoryData;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 /*
@@ -99,8 +100,11 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             ArrayList<HistoryData> stockHistory = intent.getExtras().getParcelableArrayList(StockTaskService.DETAIL_VALUES);
             LineSet data = new LineSet();
             data.setColor(Color.GREEN)
-
-                    //.setFill(Color.BLUE)
+                    // todo gradient
+       /*     dataset.setColor(Color.parseColor("#53c1bd"))
+                    .setFill(Color.parseColor("#3d6c73"))
+                    .setGradientFill(new int[]{Color.parseColor("#364d5a"), Color.parseColor("#3f7178")}, null);
+                    .setFill(Color.parseColor("#3b8df2"))*/
                     .setThickness(2)
 
                     .beginAt(0);
@@ -117,11 +121,16 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 data.addPoint(item.mLabel, item.mClosingPrice);
             }
 
+            // pad max so values are larger than Y axis range, which are ints and get truncated on round operation
+            maxValue = maxValue + 1.f;
+
             mChartView.setAxisBorderValues(Math.round(minValue),Math.round(maxValue));
             mChartView.setLabelsColor(Color.WHITE);
             mChartView.setBorderSpacing(Tools.fromDpToPx(15));
+            mChartView.setLabelsFormat(new DecimalFormat("#.##"));
            // mChartView.setGrid(ChartView.GridType.HORIZONTAL, 5, 1, new Paint())
 
+            Log.d(TAG, "MAX: " + maxValue + " MIN: " + minValue + " count: " + stockHistory.size());
                         
             mChartView.addData(data);
             mChartView.show();

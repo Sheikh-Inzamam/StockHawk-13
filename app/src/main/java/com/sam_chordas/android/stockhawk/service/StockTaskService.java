@@ -78,8 +78,8 @@ public class StockTaskService extends GcmTaskService {
 
         // todo calculate and encode start dates and pass into query in params
 
-        String startDate = "2016-03-21";
-        String endDate = "2016-03-25";
+        String startDate = "2016-03-14";
+        String endDate = "2016-03-18";
 
         // todo get time span from params and construct query
         // todo how to get data back from query to view?
