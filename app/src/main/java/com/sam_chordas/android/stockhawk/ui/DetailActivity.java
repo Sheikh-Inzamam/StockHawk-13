@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.db.chart.Tools;
 import com.db.chart.model.LineSet;
@@ -38,8 +39,32 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private LineChartView mChartView;
     private Cursor mCursor;
     private static final int DETAILS_CURSOR_LOADER_ID = 0;
-    private String mStockSymbol;
+    private String mSymbol;
+    
+    
 
+    private TextView mName;
+    private TextView mSymbolView;
+    private TextView mPrice;
+    private TextView mChange;    
+    private TextView mOpen;
+    private TextView mHigh;
+    private TextView mLow;
+    private TextView mMarketCap;
+    private TextView mPriceEarnings;
+    private TextView mDividendYield;
+/*
+    private String mName;
+    private String mSymbol;
+    private String mPrice;
+    private String mChange;
+    private String mOpen;
+    private String mHigh;
+    private String mLow;
+    private String mMarketCap;
+    private String mPriceEarnings;
+    private String mDividendYield;
+    */
     private BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -56,13 +81,9 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                     find min/max values and set chart Y range
                     set colors
                     grid just horizontal lines
-
                     1 day
-                        10, 12 2, 4
                     5 day
-                        mar 18 21 222 23
                     1 month
-
                     6 month
                     1 year
 
@@ -71,6 +92,8 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
 
              */
+
+            //mChartView.reset();
 
             // todo see if can consolidate
             ArrayList<HistoryData> stockHistory = intent.getExtras().getParcelableArrayList(StockTaskService.DETAIL_VALUES);
@@ -99,8 +122,12 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             mChartView.setBorderSpacing(Tools.fromDpToPx(15));
            // mChartView.setGrid(ChartView.GridType.HORIZONTAL, 5, 1, new Paint())
 
+                        
             mChartView.addData(data);
             mChartView.show();
+            
+            
+            
         }
     };
 
@@ -117,7 +144,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         Log.d(TAG, "symbol is: " + symbol);
 
 
-        mStockSymbol = symbol;
+        mSymbol = symbol;
 
         getLoaderManager().initLoader(DETAILS_CURSOR_LOADER_ID, null, this);
 
@@ -128,7 +155,16 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mServiceIntent.putExtra("symbol", symbol);
         startService(mServiceIntent);
 
-
+        mName = (TextView)findViewById(R.id.name);
+        mSymbolView = (TextView)findViewById(R.id.symbol);
+        mPrice = (TextView)findViewById(R.id.price);
+        mChange = (TextView)findViewById(R.id.change);
+        mOpen = (TextView)findViewById(R.id.open);
+        mHigh = (TextView)findViewById(R.id.high);
+        mLow = (TextView)findViewById(R.id.low);
+        mMarketCap = (TextView)findViewById(R.id.market_cap);
+        mPriceEarnings = (TextView)findViewById(R.id.pe);
+        mDividendYield = (TextView)findViewById(R.id.div_yield);
     }
 
     @Override
@@ -147,10 +183,22 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // This narrows the return to only the stocks that are most current.
-        // todo set up colums for details screen
         return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
-                new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
-                        QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
+                new String[] {
+                        QuoteColumns._ID,
+                        QuoteColumns.SYMBOL,
+                        QuoteColumns.BIDPRICE,
+                        QuoteColumns.PERCENT_CHANGE,
+                        QuoteColumns.CHANGE,
+                        QuoteColumns.ISUP,
+                        QuoteColumns.NAME,
+                        QuoteColumns.OPEN_PRICE,
+                        QuoteColumns.DAYSLOW,
+                        QuoteColumns.DAYSHIGH,
+                        QuoteColumns.PE_RATIO,
+                        QuoteColumns.DIV_YIELD,
+                        QuoteColumns.MARKET_CAP
+                },
                 QuoteColumns.ISCURRENT + " = ?",
                 new String[]{"1"},
                 null);
@@ -163,16 +211,28 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
         if (mCursor != null) {
             Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
-             //       QuoteColumns.COLUMNS,
-                   new String[]{QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
-                            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},//, QuoteColumns.PE_RATIO},
-
-                    QuoteColumns.SYMBOL + "= ?",
-                    new String[]{mStockSymbol}, null);
+                   new String[] {
+                           QuoteColumns.SYMBOL,
+                           QuoteColumns.BIDPRICE,
+                           QuoteColumns.PERCENT_CHANGE,
+                           QuoteColumns.CHANGE,
+                           QuoteColumns.ISUP,
+                           QuoteColumns.NAME,
+                           QuoteColumns.OPEN_PRICE,
+                           QuoteColumns.DAYSLOW,
+                           QuoteColumns.DAYSHIGH,
+                           QuoteColumns.PE_RATIO,
+                           QuoteColumns.DIV_YIELD,
+                           QuoteColumns.MARKET_CAP
+                   },
+                   QuoteColumns.SYMBOL + "= ?",
+                   new String[]{mSymbol}, null);
 
             if (c.getCount() != 0) {
                 c.moveToFirst();
 
+
+                // dump columns and values
                 String[] columnNames = c.getColumnNames();
                 for (String name:columnNames) {
                     int index = c.getColumnIndex(name);
@@ -184,13 +244,29 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                     }
                 }
 
-/*
-                String symbol = c.getString(c.getColumnIndex(QuoteColumns.SYMBOL));
-                String price = c.getString(c.getColumnIndex(QuoteColumns.BIDPRICE));
-                String percentChange = c.getString(c.getColumnIndex(QuoteColumns.PERCENT_CHANGE));
-                int isUp = c.getInt(c.getColumnIndex(QuoteColumns.ISUP));
-                Log.d(TAG, "symbol is " + symbol);
-                */
+                String val;
+                mName.setText(c.getString(c.getColumnIndex(QuoteColumns.NAME)));
+                mSymbolView.setText(c.getString(c.getColumnIndex(QuoteColumns.SYMBOL)));
+                mPrice.setText(c.getString(c.getColumnIndex(QuoteColumns.BIDPRICE)));
+                mChange.setText(c.getString(c.getColumnIndex(QuoteColumns.PERCENT_CHANGE)));
+                mOpen.setText(c.getString(c.getColumnIndex(QuoteColumns.OPEN_PRICE)));
+                mHigh.setText(c.getString(c.getColumnIndex(QuoteColumns.DAYSHIGH)));
+                mLow.setText(c.getString(c.getColumnIndex(QuoteColumns.DAYSLOW)));
+                mMarketCap.setText(c.getString(c.getColumnIndex(QuoteColumns.MARKET_CAP)));
+
+                val = c.getString(c.getColumnIndex(QuoteColumns.PE_RATIO));
+                if (val.equals("null")) {
+                    val = "N/A";
+                }
+                mPriceEarnings.setText(val);
+
+                val = c.getString(c.getColumnIndex(QuoteColumns.DIV_YIELD));
+                if (val.equals("null")) {
+                    val = "N/A";
+                }
+                mDividendYield.setText(val);
+
+                c.close();
             }
         }
     }
@@ -198,6 +274,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
        // mCursorAdapter.swapCursor(null);
+        // todo what here?
     }
 
 

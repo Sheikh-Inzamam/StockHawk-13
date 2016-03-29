@@ -15,7 +15,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +22,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.gms.gcm.GcmNetworkManager;
+import com.google.android.gms.gcm.PeriodicTask;
+import com.google.android.gms.gcm.Task;
 import com.melnykov.fab.FloatingActionButton;
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
@@ -31,6 +33,7 @@ import com.sam_chordas.android.stockhawk.rest.QuoteCursorAdapter;
 import com.sam_chordas.android.stockhawk.rest.RecyclerViewItemClickListener;
 import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
+import com.sam_chordas.android.stockhawk.service.StockTaskService;
 import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
 
 public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -140,9 +143,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
             long period = 3600L;
             long flex = 10L;
             String periodicTag = "periodic";
-
-            //todo turn back on
-/*            // create a periodic task to pull stocks once every hour after the app has been opened. This
+            // create a periodic task to pull stocks once every hour after the app has been opened. This
             // is so Widget data stays up to date.
             PeriodicTask periodicTask = new PeriodicTask.Builder()
                     .setService(StockTaskService.class)
@@ -154,7 +155,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                     .build();
             // Schedule task with tag "periodic." This ensure that only the stocks present in the DB
             // are updated.
-            GcmNetworkManager.getInstance(this).schedule(periodicTask);*/
+            GcmNetworkManager.getInstance(this).schedule(periodicTask);
         }
     }
 
@@ -208,50 +209,17 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // This narrows the return to only the stocks that are most current.
         return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
-                null,
-           //     QuoteColumns.COLUMNS,
-
-              //  new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
-               //         QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},//, QuoteColumns.PE_RATIO},
-//
-//                new String[] {
-//                        QuoteColumns._ID,
-//                        QuoteColumns.BIDPRICE,
-//                        QuoteColumns.CHANGE,
-//                        //  QuoteColumns.CREATED,
-//                        QuoteColumns.DAYSHIGH,
-//                        QuoteColumns.DAYSLOW,
-//                        QuoteColumns.DIV_YIELD,
-//                        //   QuoteColumns.ISCURRENT,
-//                        QuoteColumns.ISUP,
-//                        QuoteColumns.MARKET_CAP,
-//                        QuoteColumns.NAME,
-//                        QuoteColumns.OPEN_PRICE,
-//                        QuoteColumns.PE_RATIO,
-//                        QuoteColumns.PERCENT_CHANGE,
-//                        QuoteColumns.SYMBOL
-//                },
-
-
+                new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
+                        QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
                 QuoteColumns.ISCURRENT + " = ?",
                 new String[]{"1"},
                 null);
     }
 
-
-
-
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
         mCursor = data;
-
-        if (mCursor != null) {
-            mCursor.moveToFirst();
-            String[] columnNames = mCursor.getColumnNames();
-            Log.d("------->main", columnNames.toString());
-        }
-
     }
 
     @Override

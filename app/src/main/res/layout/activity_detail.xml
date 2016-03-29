@@ -11,6 +11,203 @@
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal|top">
 
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/details_card"
+            >
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/details_grid"
+                android:columnCount="5">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/name"
+                    android:layout_alignParentTop="true"
+                    android:textSize="18sp"
+                    android:text="Big Corporation Name"
+                    android:layout_columnSpan="4"
+                    android:layout_row="0" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/symbol"
+                    android:layout_below="@+id/name"
+                    android:text="SYMBOL"
+                    android:layout_row="1"
+                    android:layout_columnSpan="2"
+                    android:layout_column="0" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/price"
+                    android:text="$49.59"
+                    android:textSize="14sp"
+                    android:layout_alignTop="@+id/symbol"
+                    android:layout_centerHorizontal="true"
+                    android:layout_row="1" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/change"
+                    android:text="$1.59"
+                    android:textSize="14sp"
+                    android:layout_alignTop="@+id/price"
+                    android:layout_toRightOf="@+id/price"
+                    android:layout_toEndOf="@+id/price"
+                    android:layout_marginLeft="29dp"
+                    android:layout_marginStart="29dp"
+                    android:layout_row="1" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Open:"
+                    android:id="@+id/open_label"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_row="2"
+                    android:layout_column="0" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/open"
+                    android:text="$49.59"
+                    android:layout_below="@+id/symbol"
+                    android:layout_toRightOf="@+id/symbol"
+                    android:layout_toEndOf="@+id/symbol"
+                    android:layout_row="2"
+                    android:layout_column="1" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="High:"
+                    android:id="@+id/high_label"
+                    android:layout_above="@+id/low"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_column="0"
+                    android:layout_row="4" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/high"
+                    android:text="$61.59"
+                    android:layout_below="@+id/open"
+                    android:layout_alignLeft="@+id/open"
+                    android:layout_alignStart="@+id/open"
+                    android:layout_column="1"
+                    android:layout_row="4" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Low:"
+                    android:id="@+id/low_label"
+                    android:layout_below="@+id/high_label"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_column="0"
+                    android:layout_row="5" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/low"
+                    android:text="$31.59"
+                    android:layout_below="@+id/high"
+                    android:layout_toRightOf="@+id/symbol"
+                    android:layout_toEndOf="@+id/symbol"
+                    android:layout_row="5"
+                    android:layout_column="1" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mkt Cap"
+                    android:id="@+id/market_cap_label"
+                    android:layout_above="@+id/pe_label"
+                    android:layout_toRightOf="@+id/name"
+                    android:layout_toEndOf="@+id/name"
+                    android:layout_row="2"
+                    android:layout_column="3" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/market_cap"
+                    android:text="$44B"
+                    android:layout_above="@+id/pe"
+                    android:layout_toRightOf="@+id/change"
+                    android:layout_toEndOf="@+id/change"
+                    android:layout_column="4"
+                    android:layout_row="2" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PE ratio"
+                    android:id="@+id/pe_label"
+                    android:layout_above="@+id/div_yield"
+                    android:layout_alignLeft="@+id/div_yield_label"
+                    android:layout_alignStart="@+id/div_yield_label"
+                    android:layout_column="3"
+                    android:layout_row="4" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/pe"
+                    android:text="12.34"
+                    android:layout_alignTop="@+id/high"
+                    android:layout_alignRight="@+id/div_yield"
+                    android:layout_alignEnd="@+id/div_yield"
+                    android:layout_column="4"
+                    android:layout_row="4" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Div Yield"
+                    android:id="@+id/div_yield_label"
+                    android:layout_below="@+id/pe_label"
+                    android:layout_toRightOf="@+id/name"
+                    android:layout_toEndOf="@+id/name"
+                    android:layout_column="3"
+                    android:layout_row="5" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/div_yield"
+                    android:text="5.73%"
+                    android:layout_below="@+id/pe"
+                    android:layout_alignLeft="@+id/market_cap"
+                    android:layout_alignStart="@+id/market_cap"
+                    android:layout_column="4"
+                    android:layout_row="5" />
+            </GridLayout>
+
+
+
+
+
+
+        </android.support.v7.widget.CardView>
+
         <com.db.chart.view.LineChartView
             xmlns:chart="http://schemas.android.com/apk/res-auto"
             android:id="@+id/history_chart"
