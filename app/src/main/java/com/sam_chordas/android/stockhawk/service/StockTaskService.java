@@ -18,6 +18,7 @@ import com.google.android.gms.gcm.TaskParams;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
+import com.sam_chordas.android.stockhawk.ui.DetailActivity;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -72,9 +73,40 @@ public class StockTaskService extends GcmTaskService {
 
     private int handleDetailsQuery(TaskParams params) {
         StringBuilder urlStringBuilder = new StringBuilder();
-        // get symbol from params.getExtra and build query
         String stockSymbol = params.getExtras().getString("symbol");
+        int history_range = params.getExtras().getInt("history_range");
+        String rangeFlag;
+        // todo encapsulate
+        switch (history_range) {
+            case DetailActivity.HISTORY_1_DAY:
+            default:
+                rangeFlag = "1d";
+                break;
+            case DetailActivity.HISTORY_5_DAY:
+                rangeFlag = "5d";
+                break;
+            case DetailActivity.HISTORY_1_MONTH:
+                rangeFlag = "1m";
+                break;
+            case DetailActivity.HISTORY_6_MONTH:
+                rangeFlag = "6m";
+                break;
+            case DetailActivity.HISTORY_1_YEAR:
+                rangeFlag = "1y";
+                break;
+        }
 
+       // try {
+            String baseUrl = "http://chartapi.finance.yahoo.com/instrument/1.0/%s/chartdata;type=quote;range=%s/json";
+            String finalurl = String.format(baseUrl, stockSymbol, rangeFlag);
+            //urlStringBuilder.append(URLEncoder.encode(finalurl, "UTF-8"));
+            urlStringBuilder.append(finalurl);
+//        }
+//        catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+
+/*
 
         // todo calculate and encode start dates and pass into query in params
 
@@ -101,6 +133,10 @@ public class StockTaskService extends GcmTaskService {
         // finalize the URL for the API query.
         urlStringBuilder.append("&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables."
                 + "org%2Falltableswithkeys&callback=");
+
+*/
+
+
 
         String urlString;
         String getResponse;

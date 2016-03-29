@@ -12,7 +12,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by sam_chordas on 10/8/15.
@@ -58,7 +61,7 @@ public class Utils {
         }
         return batchOperations;
     }
-
+/*
     public static ArrayList<HistoryData> parseHistoryResults(String JSON) {
         JSONObject jsonObject = null;
         JSONArray resultsArray = null;
@@ -86,6 +89,52 @@ public class Utils {
         }
 
         return stockHistory;
+    }
+*/
+
+    // todo set up date parser to convert timestamp or date string to chart format
+    public static ArrayList<HistoryData> parseHistoryResults(String jsonp) {
+        JSONObject jsonObject = null;
+        JSONArray resultsArray = null;
+        ArrayList<HistoryData> stockHistory = new ArrayList<>();
+        // strip off jsonp wrapper
+        String JSON = jsonp.substring(jsonp.indexOf("(") + 1, jsonp.lastIndexOf(")"));
+        try {
+            jsonObject = new JSONObject(JSON);
+            if (jsonObject != null && jsonObject.length() != 0) {
+
+                resultsArray = jsonObject.getJSONArray("series");
+                if (resultsArray != null && resultsArray.length() != 0) {
+                    for (int i = 0; i < resultsArray.length(); i++) {
+                        jsonObject = resultsArray.getJSONObject(i);
+                        String closingPrice = jsonObject.getString("close");
+                        float closingPriceFloat = Float.parseFloat(Utils.truncateBidPrice(closingPrice));
+                       // stockHistory.add(new HistoryData(jsonObject.getString("Date"), closingPriceFloat));
+                        // if get timestamp, conv
+                        String timeStamp = jsonObject.getString("Timestamp");
+                        String finalDateString = convertTimeStampToDateString(timeStamp);
+                        stockHistory.add(new HistoryData(finalDateString, closingPriceFloat));
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "parseHistoryResults - String to JSON failed: " + e);
+        }
+
+        return stockHistory;
+    }
+
+    // todo match format of yql dates
+    public static String convertTimeStampToDateString(String timeStamp) {
+        Calendar calendar = Calendar.getInstance();
+        long timeStampMilliseconds = Long.parseLong(timeStamp);
+        timeStampMilliseconds *= 1000;
+        calendar.setTimeInMillis(timeStampMilliseconds);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date now = calendar.getTime(); // set the current datetime in a Date-object
+        String timeString = sdf.format(now); // contains yyyy-MM-dd (e.g. 2012-03-15 for March 15, 2012)
+        Log.d(TAG, "convertTimeStampToDateString: " + timeString);
+        return timeString;
     }
 
     public static String truncateBidPrice(String bidPrice) {

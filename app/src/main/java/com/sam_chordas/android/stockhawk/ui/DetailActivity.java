@@ -12,6 +12,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.db.chart.Tools;
@@ -36,6 +38,13 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
     public static final String TAG = DetailActivity.class.getSimpleName();
 
+    // todo encapsulate
+    public static final int HISTORY_1_DAY = 0;
+    public static final int HISTORY_5_DAY = 1;
+    public static final int HISTORY_1_MONTH = 2;
+    public static final int HISTORY_6_MONTH = 3;
+    public static final int HISTORY_1_YEAR = 4;
+
     private Intent mServiceIntent;
     private LineChartView mChartView;
     private Cursor mCursor;
@@ -54,18 +63,15 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private TextView mMarketCap;
     private TextView mPriceEarnings;
     private TextView mDividendYield;
-/*
-    private String mName;
-    private String mSymbol;
-    private String mPrice;
-    private String mChange;
-    private String mOpen;
-    private String mHigh;
-    private String mLow;
-    private String mMarketCap;
-    private String mPriceEarnings;
-    private String mDividendYield;
-    */
+
+    private Button mHistory1Day;
+    private Button mHistory5Day;
+    private Button mHistory1Month;
+    private Button mHistory6Month;
+    private Button mHistory1Year;
+
+
+
     private BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -75,25 +81,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 Log.e(TAG, "Details query failed...");
                 return;
             }
-
-            /*
-                todo
-                    change historydata to extend lineset and implement Parcelable
-                    find min/max values and set chart Y range
-                    set colors
-                    grid just horizontal lines
-                    1 day
-                    5 day
-                    1 month
-                    6 month
-                    1 year
-
-                    grid y range min/ax data
-                    grid x labels :
-
-
-             */
-
             //mChartView.reset();
 
             // todo see if can consolidate
@@ -134,9 +121,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                         
             mChartView.addData(data);
             mChartView.show();
-            
-            
-            
         }
     };
 
@@ -151,18 +135,9 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         // todo put symbol string in constant
         String symbol = intent.getStringExtra("symbol");
         Log.d(TAG, "symbol is: " + symbol);
-
-
         mSymbol = symbol;
 
         getLoaderManager().initLoader(DETAILS_CURSOR_LOADER_ID, null, this);
-
-
-        mServiceIntent = new Intent(this, StockIntentService.class);
-        // todo add params for date range
-        mServiceIntent.putExtra("tag", "details");
-        mServiceIntent.putExtra("symbol", symbol);
-        startService(mServiceIntent);
 
         mName = (TextView)findViewById(R.id.name);
         mSymbolView = (TextView)findViewById(R.id.symbol);
@@ -174,6 +149,60 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mMarketCap = (TextView)findViewById(R.id.market_cap);
         mPriceEarnings = (TextView)findViewById(R.id.pe);
         mDividendYield = (TextView)findViewById(R.id.div_yield);
+
+        mHistory1Day = (Button)findViewById(R.id.history_1d);
+        mHistory5Day = (Button)findViewById(R.id.history_5d);
+        mHistory1Month = (Button)findViewById(R.id.history_1m);
+        mHistory6Month = (Button)findViewById(R.id.history_6m);
+        mHistory1Year = (Button)findViewById(R.id.history_1y);
+
+        // todo kick off default history chart - 1 day
+        showHistoryChart(symbol, DetailActivity.HISTORY_1_DAY);
+
+        setupHistoryButtons();
+    }
+
+    private void setupHistoryButtons() {
+        mHistory1Day.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showHistoryChart(mSymbol, DetailActivity.HISTORY_1_DAY);
+            }
+        });
+        mHistory5Day.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showHistoryChart(mSymbol, DetailActivity.HISTORY_5_DAY);
+            }
+        });
+        mHistory1Month.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showHistoryChart(mSymbol, DetailActivity.HISTORY_1_MONTH);
+            }
+        });
+        mHistory6Month.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showHistoryChart(mSymbol, DetailActivity.HISTORY_6_MONTH);
+            }
+        });
+        mHistory1Year.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showHistoryChart(mSymbol, DetailActivity.HISTORY_1_YEAR);
+            }
+        });
+    }
+
+
+    private void showHistoryChart(String symbol, int range) {
+        mServiceIntent = new Intent(this, StockIntentService.class);
+        // todo add params for date range
+        mServiceIntent.putExtra("tag", "details");
+        mServiceIntent.putExtra("symbol", symbol);
+        mServiceIntent.putExtra("history_range", range);
+        startService(mServiceIntent);
     }
 
     @Override
