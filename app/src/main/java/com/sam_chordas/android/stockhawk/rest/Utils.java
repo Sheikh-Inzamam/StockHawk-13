@@ -6,6 +6,7 @@ import android.util.Log;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.service.HistoryData;
+import com.sam_chordas.android.stockhawk.service.HistoryItem;
 import com.sam_chordas.android.stockhawk.service.InvalidStockSymbolException;
 
 import org.json.JSONArray;
@@ -16,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Created by sam_chordas on 10/8/15.
@@ -115,10 +117,21 @@ public class Utils {
         return Float.parseFloat(Utils.truncateBidPrice(price));
     }
 
-    public static ArrayList<HistoryData> parseHistoryResults(String jsonp) {
+    /*
+    optimize
+        put timestamps and prices into array
+        sort or assume sorted
+        use array.find to get index of timestamp that matches
+        for label:labels
+            index = array.find(label)
+            if index
+                labels(index).add timetamp
+ */
+
+    public static HistoryData parseHistoryResults(String jsonp) {
         JSONObject jsonObject = null;
         JSONArray resultsArray = null;
-        ArrayList<HistoryData> stockHistory = new ArrayList<>();
+        HistoryData h = new HistoryData();
 
         try {
             jsonObject = new JSONObject(removeJsonpWrapper(jsonp));
@@ -130,56 +143,56 @@ public class Utils {
                 JSONObject closingValues = jsonObject.getJSONObject("ranges").getJSONObject("close");
                 String min = closingValues.getString("min");
                 String max = closingValues.getString("max");
+                h.setMinPrice(Float.valueOf(min));
+                h.setMaxPrice(Float.valueOf(max));
 
-
-                String label;
+                // dump labels
                 for (int j=0; j < labels.length(); j++) {
-                    label = labels.getString(j);
-                    Log.d(TAG, "CHART LABEL date: " + convertTimeStampToDateString(label));
+                    Log.d(TAG, "CHART LABEL: " + convertTimeStampToDateString(labels.getString(j)));
                 }
 
                 if (resultsArray != null && resultsArray.length() != 0) {
+
                     for (int i = 0; i < resultsArray.length(); i++) {
                         jsonObject = resultsArray.getJSONObject(i);
-
-//                        String closingPrice = jsonObject.getString("close");
-//                        float closingPriceFloat = Float.parseFloat(Utils.truncateBidPrice(closingPrice));
-
-                       // stockHistory.add(new HistoryData(jsonObject.getString("Date"), closingPriceFloat));
-
-                        float closingPriceFloat = formatPrice(jsonObject.getString("close"));
+                        float closingPrice = formatPrice(jsonObject.getString("close"));
                         String finalDateString = "";
                         String timeStamp = jsonObject.getString("Timestamp");
 
+                        // todo handle query where Date string is used not timestamp
                         // if timeStamp matches label add label to data array
+                        // todo make sure we get some labels
                         for (int j=0; j< labels.length(); j++) {
-                            label = labels.getString(j);
+                            String label = labels.getString(j);
                             if (label.equals(timeStamp)) {
-                                finalDateString = convertTimeStampToDateString(timeStamp);
+                               // finalDateString = convertTimeStampToDateString(timeStamp);
+                                Log.d(TAG, "adding label: " + finalDateString);
                             }
                         }
-                        stockHistory.add(new HistoryData(finalDateString, closingPriceFloat));
+                        h.addEntry(new HistoryItem(finalDateString, closingPrice));
                     }
+
                 }
             }
         } catch (JSONException e) {
             Log.e(TAG, "parseHistoryResults - String to JSON failed: " + e);
         }
 
-        return stockHistory;
+        return h;
     }
 
 
     // todo match format of yql dates
     public static String convertTimeStampToDateString(String timeStamp) {
         Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("EST"));//"America/Los_Angeles"));//"America/New_York"));
+
         long timeStampMilliseconds = Long.parseLong(timeStamp);
         timeStampMilliseconds *= 1000;
         calendar.setTimeInMillis(timeStampMilliseconds);
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");//("yyyy-MM-dd");
         Date now = calendar.getTime(); // set the current datetime in a Date-object
-        String timeString = sdf.format(now); // contains yyyy-MM-dd (e.g. 2012-03-15 for March 15, 2012)
-
+        String timeString = sdf.format(now);
         return timeString;
     }
 

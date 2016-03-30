@@ -26,7 +26,6 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 
 /**
  * Created by sam_chordas on 9/30/15.
@@ -140,7 +139,7 @@ public class StockTaskService extends GcmTaskService {
 
         String urlString;
         String getResponse;
-        ArrayList<HistoryData> stockHistory = null;
+        HistoryData stockHistory = null;
         int result = GcmNetworkManager.RESULT_FAILURE;
 
         if (urlStringBuilder != null) {
@@ -149,9 +148,7 @@ public class StockTaskService extends GcmTaskService {
             try {
                 getResponse = fetchData(urlString);
                 stockHistory = Utils.parseHistoryResults(getResponse);
-                if (stockHistory.size() > 0) {
-                    result = GcmNetworkManager.RESULT_SUCCESS;
-                }
+                result = GcmNetworkManager.RESULT_SUCCESS;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -166,17 +163,24 @@ public class StockTaskService extends GcmTaskService {
     public static final String DETAIL_VALUES = "detail_values";
     public static final String DETAIL_RESULT = "detail_result";
 
-    //ArrayList<HistoryData> stockHistory = this.getIntent().getExtras().getParcelableArrayList(DETAIL_VALUES);
+    private void sendDetailResults(HistoryData stockHistory, int resultCode) {
+        Intent intent = new Intent(DETAIL_INTENT);
+        intent.putExtra(DETAIL_RESULT, resultCode);
+        if (resultCode == GcmNetworkManager.RESULT_SUCCESS) {
+            //intent.putParcelableArrayListExtra(DETAIL_VALUES, stockHistory);
+            intent.putExtra(DETAIL_VALUES, stockHistory);
+        }
+        mContext.sendBroadcast(intent);
+    }
 
-    private void sendDetailResults(ArrayList<HistoryData> stockHistory, int resultCode) {
+/*    private void sendDetailResults(ArrayList<HistoryData> stockHistory, int resultCode) {
         Intent intent = new Intent(DETAIL_INTENT);
         intent.putExtra(DETAIL_RESULT, resultCode);
         if (resultCode == GcmNetworkManager.RESULT_SUCCESS) {
             intent.putParcelableArrayListExtra(DETAIL_VALUES, stockHistory);
         }
         mContext.sendBroadcast(intent);
-    }
-
+    }*/
     private int handleQuoteQuery(TaskParams params) {
         Cursor initQueryCursor;
         StringBuilder urlStringBuilder = new StringBuilder();

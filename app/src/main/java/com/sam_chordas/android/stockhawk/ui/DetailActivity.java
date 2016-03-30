@@ -24,10 +24,10 @@ import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.service.HistoryData;
+import com.sam_chordas.android.stockhawk.service.HistoryItem;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 /*
@@ -84,7 +84,8 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             //mChartView.reset();
 
             // todo see if can consolidate
-            ArrayList<HistoryData> stockHistory = intent.getExtras().getParcelableArrayList(StockTaskService.DETAIL_VALUES);
+            HistoryData stockHistory = intent.getExtras().getParcelable(StockTaskService.DETAIL_VALUES);
+
             LineSet data = new LineSet();
             data.setColor(Color.GREEN)
                     // todo gradient
@@ -93,31 +94,29 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                     .setGradientFill(new int[]{Color.parseColor("#364d5a"), Color.parseColor("#3f7178")}, null);
                     .setFill(Color.parseColor("#3b8df2"))*/
                     .setThickness(2)
-
                     .beginAt(0);
 
-            float minValue = stockHistory.get(0).mClosingPrice;
-            float maxValue = minValue;
-            HistoryData item;
-            for (int i=stockHistory.size()-1; i>=0; i--) {
-                item = stockHistory.get(i);
-                if (item.mClosingPrice < minValue)
-                    minValue = item.mClosingPrice;
-                if (item.mClosingPrice > maxValue)
-                    maxValue = item.mClosingPrice;
-                data.addPoint(item.mLabel, item.mClosingPrice);
+
+
+
+
+
+            ArrayList<HistoryItem> items = stockHistory.getItems();
+            for (HistoryItem item:items) {
+                data.addPoint(item.getLabel(), item.getPrice());
             }
 
+            float minPrice = stockHistory.getMinPrice();
+            float maxPrice = stockHistory.getMaxPrice();
             // pad max so values are larger than Y axis range, which are ints and get truncated on round operation
-            maxValue = maxValue + 1.f;
-
-            mChartView.setAxisBorderValues(Math.round(minValue),Math.round(maxValue));
+            maxPrice = maxPrice + 1.f;
+            mChartView.setAxisBorderValues(Math.round(minPrice),Math.round(maxPrice));
             mChartView.setLabelsColor(Color.WHITE);
             mChartView.setBorderSpacing(Tools.fromDpToPx(15));
-            mChartView.setLabelsFormat(new DecimalFormat("#.##"));
-           // mChartView.setGrid(ChartView.GridType.HORIZONTAL, 5, 1, new Paint())
+            //mChartView.setLabelsFormat(new DecimalFormat("#.##"));
+            // mChartView.setGrid(ChartView.GridType.HORIZONTAL, 5, 1, new Paint())
 
-            Log.d(TAG, "MAX: " + maxValue + " MIN: " + minValue + " count: " + stockHistory.size());
+            Log.d(TAG, "MAX: " + maxPrice + " MIN: " + minPrice + " count: " + items.size());
                         
             mChartView.addData(data);
             mChartView.show();
