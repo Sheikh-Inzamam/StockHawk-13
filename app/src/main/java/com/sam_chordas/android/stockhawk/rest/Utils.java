@@ -93,26 +93,71 @@ public class Utils {
 */
 
     // todo set up date parser to convert timestamp or date string to chart format
+                    /*
+                    get labels
+                    get closing prices
+
+                    if timestamp in labels
+                        convert and add it
+
+                        "ranges" : {"close" : {"min" :83.2025,"max" :84.5900 }
+
+                 */
+
+    // todo move data into array or better structure, convert to float here
+    // strip off jsonp wrapper
+    public static String removeJsonpWrapper(String jsonp) {
+        return jsonp.substring(jsonp.indexOf("(") + 1, jsonp.lastIndexOf(")"));
+    }
+
+    // string to truncated float EG 82.01
+    private static float formatPrice(String price) {
+        return Float.parseFloat(Utils.truncateBidPrice(price));
+    }
+
     public static ArrayList<HistoryData> parseHistoryResults(String jsonp) {
         JSONObject jsonObject = null;
         JSONArray resultsArray = null;
         ArrayList<HistoryData> stockHistory = new ArrayList<>();
-        // strip off jsonp wrapper
-        String JSON = jsonp.substring(jsonp.indexOf("(") + 1, jsonp.lastIndexOf(")"));
+
         try {
-            jsonObject = new JSONObject(JSON);
+            jsonObject = new JSONObject(removeJsonpWrapper(jsonp));
+
             if (jsonObject != null && jsonObject.length() != 0) {
 
+                JSONArray labels = jsonObject.getJSONArray("labels");
                 resultsArray = jsonObject.getJSONArray("series");
+                JSONObject closingValues = jsonObject.getJSONObject("ranges").getJSONObject("close");
+                String min = closingValues.getString("min");
+                String max = closingValues.getString("max");
+
+
+                String label;
+                for (int j=0; j < labels.length(); j++) {
+                    label = labels.getString(j);
+                    Log.d(TAG, "CHART LABEL date: " + convertTimeStampToDateString(label));
+                }
+
                 if (resultsArray != null && resultsArray.length() != 0) {
                     for (int i = 0; i < resultsArray.length(); i++) {
                         jsonObject = resultsArray.getJSONObject(i);
-                        String closingPrice = jsonObject.getString("close");
-                        float closingPriceFloat = Float.parseFloat(Utils.truncateBidPrice(closingPrice));
+
+//                        String closingPrice = jsonObject.getString("close");
+//                        float closingPriceFloat = Float.parseFloat(Utils.truncateBidPrice(closingPrice));
+
                        // stockHistory.add(new HistoryData(jsonObject.getString("Date"), closingPriceFloat));
-                        // if get timestamp, conv
+
+                        float closingPriceFloat = formatPrice(jsonObject.getString("close"));
+                        String finalDateString = "";
                         String timeStamp = jsonObject.getString("Timestamp");
-                        String finalDateString = convertTimeStampToDateString(timeStamp);
+
+                        // if timeStamp matches label add label to data array
+                        for (int j=0; j< labels.length(); j++) {
+                            label = labels.getString(j);
+                            if (label.equals(timeStamp)) {
+                                finalDateString = convertTimeStampToDateString(timeStamp);
+                            }
+                        }
                         stockHistory.add(new HistoryData(finalDateString, closingPriceFloat));
                     }
                 }
@@ -124,16 +169,17 @@ public class Utils {
         return stockHistory;
     }
 
+
     // todo match format of yql dates
     public static String convertTimeStampToDateString(String timeStamp) {
         Calendar calendar = Calendar.getInstance();
         long timeStampMilliseconds = Long.parseLong(timeStamp);
         timeStampMilliseconds *= 1000;
         calendar.setTimeInMillis(timeStampMilliseconds);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");//("yyyy-MM-dd");
         Date now = calendar.getTime(); // set the current datetime in a Date-object
         String timeString = sdf.format(now); // contains yyyy-MM-dd (e.g. 2012-03-15 for March 15, 2012)
-        Log.d(TAG, "convertTimeStampToDateString: " + timeString);
+
         return timeString;
     }
 
