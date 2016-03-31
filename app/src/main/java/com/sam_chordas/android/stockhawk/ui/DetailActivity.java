@@ -28,8 +28,6 @@ import com.sam_chordas.android.stockhawk.service.HistoryItem;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
 
-import java.util.ArrayList;
-
 /*
     handle
         check is connected
@@ -98,26 +96,22 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
 
 
-
-
-
-            ArrayList<HistoryItem> items = stockHistory.getItems();
-            for (HistoryItem item:items) {
+            for (HistoryItem item:stockHistory.getItems()) {
                 data.addPoint(item.getLabel(), item.getPrice());
             }
 
-            float minPrice = stockHistory.getMinPrice();
-            float maxPrice = stockHistory.getMaxPrice();
-            // pad max so values are larger than Y axis range, which are ints and get truncated on round operation
-           // maxPrice = maxPrice + 1.f;
-            mChartView.setAxisBorderValues(Math.round(minPrice),Math.round(maxPrice));
+            int minPrice = (int)Math.floor(stockHistory.getMinPrice());
+            int maxPrice = (int)Math.ceil(stockHistory.getMaxPrice());
+            Log.d(TAG, "starting values MAX: " + stockHistory.getMaxPrice() + " MIN: " + stockHistory.getMinPrice());
+            Log.d(TAG, "MAX: " + maxPrice + " MIN: " + minPrice);
+
+            mChartView.setAxisBorderValues(minPrice, maxPrice);
             mChartView.setLabelsColor(Color.WHITE);
             mChartView.setBorderSpacing(Tools.fromDpToPx(15));
             //mChartView.setLabelsFormat(new DecimalFormat("#.##"));
             // mChartView.setGrid(ChartView.GridType.HORIZONTAL, 5, 1, new Paint())
 
-            Log.d(TAG, "MAX: " + maxPrice + " MIN: " + minPrice + " count: " + items.size());
-                        
+
             mChartView.addData(data);
             mChartView.show();
         }

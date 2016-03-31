@@ -177,7 +177,6 @@ public class Utils {
         return h;
     }
 
-
     private static boolean timeStampInRange(String labelString, String timestampString) {
         long label = Long.parseLong(labelString);
         long timestamp = Long.parseLong(timestampString);
