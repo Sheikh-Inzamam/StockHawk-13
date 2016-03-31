@@ -109,7 +109,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             float minPrice = stockHistory.getMinPrice();
             float maxPrice = stockHistory.getMaxPrice();
             // pad max so values are larger than Y axis range, which are ints and get truncated on round operation
-            maxPrice = maxPrice + 1.f;
+           // maxPrice = maxPrice + 1.f;
             mChartView.setAxisBorderValues(Math.round(minPrice),Math.round(maxPrice));
             mChartView.setLabelsColor(Color.WHITE);
             mChartView.setBorderSpacing(Tools.fromDpToPx(15));

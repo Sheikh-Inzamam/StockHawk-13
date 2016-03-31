@@ -13,10 +13,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 
 /**
@@ -151,27 +149,25 @@ public class Utils {
                     Log.d(TAG, "CHART LABEL: " + convertTimeStampToDateString(labels.getString(j)));
                 }
 
+                String label = "";
+                String timeStamp;
                 if (resultsArray != null && resultsArray.length() != 0) {
-
                     for (int i = 0; i < resultsArray.length(); i++) {
                         jsonObject = resultsArray.getJSONObject(i);
                         float closingPrice = formatPrice(jsonObject.getString("close"));
-                        String finalDateString = "";
-                        String timeStamp = jsonObject.getString("Timestamp");
-
-                        // todo handle query where Date string is used not timestamp
-                        // if timeStamp matches label add label to data array
-                        // todo make sure we get some labels
-                        for (int j=0; j< labels.length(); j++) {
-                            String label = labels.getString(j);
-                            if (label.equals(timeStamp)) {
-                               // finalDateString = convertTimeStampToDateString(timeStamp);
-                                Log.d(TAG, "adding label: " + finalDateString);
-                            }
-                        }
-                        h.addEntry(new HistoryItem(finalDateString, closingPrice));
+                        timeStamp = jsonObject.getString("Timestamp");
+                        h.addEntry(new HistoryItem(timeStamp, label, closingPrice));
                     }
 
+                    for (int j=0; j< labels.length(); j++) {
+                        label = labels.getString(j);
+                        int index = h.findMatchingTimestamp(label);
+                        if (index != -1) {
+                            timeStamp = h.getItem(index).getTimeStamp();
+                            label = convertTimeStampToDateString(timeStamp);
+                            h.getItem(index).setLabel(label);
+                        }
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -182,18 +178,29 @@ public class Utils {
     }
 
 
+    private static boolean timeStampInRange(String labelString, String timestampString) {
+        long label = Long.parseLong(labelString);
+        long timestamp = Long.parseLong(timestampString);
+        return inRange(timestamp, label, label+3600);
+    }
+
+    public static boolean inRange(long x, long min, long max) {
+       return x > min && x < max;
+    }
+
     // todo match format of yql dates
     public static String convertTimeStampToDateString(String timeStamp) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone("EST"));//"America/Los_Angeles"));//"America/New_York"));
-
+        calendar.setTimeZone(TimeZone.getTimeZone("America/New_York"));
         long timeStampMilliseconds = Long.parseLong(timeStamp);
-        timeStampMilliseconds *= 1000;
+        // convert unix seconds to calendar milliseconds
+        timeStampMilliseconds *= 1000L;
         calendar.setTimeInMillis(timeStampMilliseconds);
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");//("yyyy-MM-dd");
-        Date now = calendar.getTime(); // set the current datetime in a Date-object
-        String timeString = sdf.format(now);
-        return timeString;
+        int hour = calendar.get(Calendar.HOUR);
+        // hack i want 12 hour time not 24 and noon is 0
+        if (hour == 0)
+            hour = 12;
+        return Integer.toString(hour);
     }
 
     public static String truncateBidPrice(String bidPrice) {

@@ -8,13 +8,15 @@ public class HistoryItem implements Parcelable {
 
     private String mLabel;
     private float mClosingPrice;
+    private String mTimeStamp;
 
     public HistoryItem() {
     }
 
-    public HistoryItem(String label, float price) {
+    public HistoryItem(String timeStamp, String label, float price) {
         mLabel = label;
         mClosingPrice = price;
+        mTimeStamp = timeStamp;
     }
 
     public HistoryItem(Parcel in) {
@@ -37,6 +39,10 @@ public class HistoryItem implements Parcelable {
         return mClosingPrice;
     }
 
+    public String getTimeStamp() {
+        return mTimeStamp;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -45,11 +51,13 @@ public class HistoryItem implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mLabel);
+        dest.writeString(mTimeStamp);
         dest.writeFloat(mClosingPrice);
     }
 
     private void readFromParcel(Parcel in) {
         mLabel = in.readString();
+        mTimeStamp = in.readString();
         mClosingPrice = in.readFloat();
     }
 

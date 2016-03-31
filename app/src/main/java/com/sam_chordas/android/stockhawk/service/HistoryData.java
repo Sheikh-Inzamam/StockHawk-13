@@ -12,6 +12,7 @@ public class HistoryData implements Parcelable {
     private float mMaxPrice;
     private ArrayList<HistoryItem> mChartEntries;
 
+
     public HistoryData() {
         mChartEntries = new ArrayList<>();
     }
@@ -22,6 +23,10 @@ public class HistoryData implements Parcelable {
 
     public void addEntry(HistoryItem item) {
         mChartEntries.add(item);
+    }
+
+    public HistoryItem getItem(int index) {
+        return mChartEntries.get(index);
     }
 
     public void setMinPrice(float price) {
@@ -38,6 +43,38 @@ public class HistoryData implements Parcelable {
 
     public float getMaxPrice() {
         return mMaxPrice;
+    }
+
+    /*
+        add check by range
+        return index of first item found
+     */
+    public int findMatchingTimestamp(String label) {
+        int index = -1;
+        for (int i=0; i < mChartEntries.size(); i++) {
+            HistoryItem item = mChartEntries.get(i);
+            String timestamp = item.getTimeStamp();
+            if (timestamp.equals(label)) {
+                index = i;
+                break;
+            }
+            if (timeStampInRange(label, timestamp)) {
+                index = i;
+                break;
+            }
+        }
+        return index;
+    }
+
+    private  boolean timeStampInRange(String labelString, String timestampString) {
+        long label = Long.parseLong(labelString);
+        long timestamp = Long.parseLong(timestampString);
+        // timestamp in milliseconds, labels separated by 3600ms, scaled up * 1000 to make 1 hour
+        return inRange(timestamp, label, label+3600);
+    }
+
+    private boolean inRange(long x, long min, long max) {
+        return x > min && x < max;
     }
 
     public HistoryData(Parcel in) {
