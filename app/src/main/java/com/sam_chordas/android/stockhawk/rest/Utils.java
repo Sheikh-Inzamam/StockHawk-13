@@ -61,50 +61,7 @@ public class Utils {
         }
         return batchOperations;
     }
-/*
-    public static ArrayList<HistoryData> parseHistoryResults(String JSON) {
-        JSONObject jsonObject = null;
-        JSONArray resultsArray = null;
-        ArrayList<HistoryData> stockHistory = new ArrayList<>();
 
-        try {
-            jsonObject = new JSONObject(JSON);
-            if (jsonObject != null && jsonObject.length() != 0) {
-                jsonObject = jsonObject.getJSONObject("query");
-                int count = Integer.parseInt(jsonObject.getString("count"));
-                if (count > 0) {
-                    resultsArray = jsonObject.getJSONObject("results").getJSONArray("quote");
-                    if (resultsArray != null && resultsArray.length() != 0) {
-                        for (int i = 0; i < resultsArray.length(); i++) {
-                            jsonObject = resultsArray.getJSONObject(i);
-                            String closingPrice = jsonObject.getString("Close");
-                            float closingPriceFloat = Float.parseFloat(Utils.truncateBidPrice(closingPrice));
-                            stockHistory.add(new HistoryData(jsonObject.getString("Date"), closingPriceFloat));
-                        }
-                    }
-                }
-            }
-        } catch (JSONException e) {
-            Log.e(TAG, "String to JSON failed: " + e);
-        }
-
-        return stockHistory;
-    }
-*/
-
-    // todo set up date parser to convert timestamp or date string to chart format
-                    /*
-                    get labels
-                    get closing prices
-
-                    if timestamp in labels
-                        convert and add it
-
-                        "ranges" : {"close" : {"min" :83.2025,"max" :84.5900 }
-
-                 */
-
-    // todo move data into array or better structure, convert to float here
     // strip off jsonp wrapper
     public static String removeJsonpWrapper(String jsonp) {
         return jsonp.substring(jsonp.indexOf("(") + 1, jsonp.lastIndexOf(")"));
@@ -115,18 +72,72 @@ public class Utils {
         return Float.parseFloat(Utils.truncateBidPrice(price));
     }
 
-    /*
-    optimize
-        put timestamps and prices into array
-        sort or assume sorted
-        use array.find to get index of timestamp that matches
-        for label:labels
-            index = array.find(label)
-            if index
-                labels(index).add timetamp
- */
-
     public static HistoryData parseHistoryResults(String jsonp) {
+        JSONObject jsonObject = null;
+        JSONArray resultsArray = null;
+        HistoryData h = new HistoryData();
+
+        try {
+            jsonObject = new JSONObject(removeJsonpWrapper(jsonp));
+
+            if (jsonObject != null && jsonObject.length() != 0) {
+
+                JSONArray labels = jsonObject.getJSONArray("labels");
+                resultsArray = jsonObject.getJSONArray("series");
+                JSONObject closingValues = jsonObject.getJSONObject("ranges").getJSONObject("close");
+                String min = closingValues.getString("min");
+                String max = closingValues.getString("max");
+                h.setMinPrice(Float.valueOf(min));
+                h.setMaxPrice(Float.valueOf(max));
+
+
+                // dump labels
+                for (int j=0; j < labels.length(); j++) {
+                    //Log.d(TAG, "CHART LABEL: " + convertTimeStampToDateString(labels.getString(j)));
+                    Log.d(TAG, "CHART LABEL: " + labels.getString(j));
+                }
+
+                String label;
+                String timeStamp = "";
+                String chartLabel;
+                float closingPrice;
+
+                if (resultsArray != null && resultsArray.length() != 0) {
+                    for (int i = 0; i < resultsArray.length(); i++) {
+                        jsonObject = resultsArray.getJSONObject(i);
+                        closingPrice = formatPrice(jsonObject.getString("close"));
+                       // timeStamp = jsonObject.getString("Timestamp");
+                        chartLabel = jsonObject.getString("Date");
+                        label = "";
+                        for (int j = 0; j < labels.length(); j++) {
+                            if (labels.getString(j).equals(chartLabel))
+                                label = chartLabel;
+                        }
+                        h.addEntry(new HistoryItem(timeStamp, label, closingPrice));
+                    }
+
+
+
+//                    for (int j=0; j< labels.length(); j++) {
+//                        label = labels.getString(j);
+//                        // todo pick method
+//                        int index = h.findMatchingTimestamp(label);
+//                        if (index != -1) {
+//                            timeStamp = h.getItem(index).getTimeStamp();
+//                            label = convertTimeStampToDateString(timeStamp);
+//                            h.getItem(index).setLabel(label);
+//                        }
+//                    }
+                }
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "parseDayHistoryResults - String to JSON failed: " + e);
+        }
+
+        return h;
+    }
+
+    public static HistoryData parseDayHistoryResults(String jsonp) {
         JSONObject jsonObject = null;
         JSONArray resultsArray = null;
         HistoryData h = new HistoryData();
@@ -161,6 +172,7 @@ public class Utils {
 
                     for (int j=0; j< labels.length(); j++) {
                         label = labels.getString(j);
+                        // todo pick method
                         int index = h.findMatchingTimestamp(label);
                         if (index != -1) {
                             timeStamp = h.getItem(index).getTimeStamp();
@@ -171,7 +183,7 @@ public class Utils {
                 }
             }
         } catch (JSONException e) {
-            Log.e(TAG, "parseHistoryResults - String to JSON failed: " + e);
+            Log.e(TAG, "parseDayHistoryResults - String to JSON failed: " + e);
         }
 
         return h;

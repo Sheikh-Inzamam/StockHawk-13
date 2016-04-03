@@ -95,47 +95,10 @@ public class StockTaskService extends GcmTaskService {
                 break;
         }
 
-       // try {
-            String baseUrl = "http://chartapi.finance.yahoo.com/instrument/1.0/%s/chartdata;type=quote;range=%s/json";
-            String finalurl = String.format(baseUrl, stockSymbol, rangeFlag);
-            //urlStringBuilder.append(URLEncoder.encode(finalurl, "UTF-8"));
-            urlStringBuilder.append(finalurl);
-//        }
-//        catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
-
-/*
-
-        // todo calculate and encode start dates and pass into query in params
-
-        String startDate = "2016-03-14";
-        String endDate = "2016-03-18";
-
-        // todo get time span from params and construct query
-        // todo how to get data back from query to view?
-        // does thie run in a background thread? maybe add in interface to callback with data like cursor...
-
-        try {
-            // Base URL for the Yahoo query
-            // select * from yahoo.finance.historicaldata where symbol = "MSFT" and startDate = "2015-03-01" and endDate = "2016-03-21"
-            urlStringBuilder.append("https://query.yahooapis.com/v1/public/yql?q=");
-            urlStringBuilder.append(URLEncoder.encode("select * from yahoo.finance.historicaldata where symbol = ", "UTF-8"));
-            urlStringBuilder.append(URLEncoder.encode("\"" + stockSymbol + "\"", "UTF-8"));
-            urlStringBuilder.append(URLEncoder.encode("and startDate = \"" + startDate + "\"", "UTF-8"));
-            urlStringBuilder.append(URLEncoder.encode("and endDate = \"" + endDate + "\"", "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        //https://query.yahooapis.com/v1/public/yql?q=select+*+from+yahoo.finance.quotes+where+symbol+%3D+%22xom%22%29and+startDate+%3D+%222015-03-01%22%29and+endDate+%3D+%222016-03-21%22%29&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=
-        // finalize the URL for the API query.
-        urlStringBuilder.append("&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables."
-                + "org%2Falltableswithkeys&callback=");
-
-*/
-
-
+        // todo refactor
+        String baseUrl = "http://chartapi.finance.yahoo.com/instrument/1.0/%s/chartdata;type=quote;range=%s/json";
+        String finalurl = String.format(baseUrl, stockSymbol, rangeFlag);
+        urlStringBuilder.append(finalurl);
 
         String urlString;
         String getResponse;
@@ -147,7 +110,14 @@ public class StockTaskService extends GcmTaskService {
             Log.d(TAG, "Query URL: " + urlString);
             try {
                 getResponse = fetchData(urlString);
-                stockHistory = Utils.parseHistoryResults(getResponse);
+                // todo refactor
+                if (history_range == DetailActivity.HISTORY_1_DAY ||
+                        history_range == DetailActivity.HISTORY_5_DAY ) {
+                    stockHistory = Utils.parseDayHistoryResults(getResponse);
+                }
+                else {
+                    stockHistory = Utils.parseHistoryResults(getResponse);
+                }
                 result = GcmNetworkManager.RESULT_SUCCESS;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -167,20 +137,11 @@ public class StockTaskService extends GcmTaskService {
         Intent intent = new Intent(DETAIL_INTENT);
         intent.putExtra(DETAIL_RESULT, resultCode);
         if (resultCode == GcmNetworkManager.RESULT_SUCCESS) {
-            //intent.putParcelableArrayListExtra(DETAIL_VALUES, stockHistory);
             intent.putExtra(DETAIL_VALUES, stockHistory);
         }
         mContext.sendBroadcast(intent);
     }
 
-/*    private void sendDetailResults(ArrayList<HistoryData> stockHistory, int resultCode) {
-        Intent intent = new Intent(DETAIL_INTENT);
-        intent.putExtra(DETAIL_RESULT, resultCode);
-        if (resultCode == GcmNetworkManager.RESULT_SUCCESS) {
-            intent.putParcelableArrayListExtra(DETAIL_VALUES, stockHistory);
-        }
-        mContext.sendBroadcast(intent);
-    }*/
     private int handleQuoteQuery(TaskParams params) {
         Cursor initQueryCursor;
         StringBuilder urlStringBuilder = new StringBuilder();

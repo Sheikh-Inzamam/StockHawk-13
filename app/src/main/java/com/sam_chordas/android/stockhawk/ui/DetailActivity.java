@@ -79,7 +79,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 Log.e(TAG, "Details query failed...");
                 return;
             }
-            //mChartView.reset();
 
             // todo see if can consolidate
             HistoryData stockHistory = intent.getExtras().getParcelable(StockTaskService.DETAIL_VALUES);
@@ -112,6 +111,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             // mChartView.setGrid(ChartView.GridType.HORIZONTAL, 5, 1, new Paint())
 
 
+            mChartView.dismiss();
             mChartView.addData(data);
             mChartView.show();
         }
