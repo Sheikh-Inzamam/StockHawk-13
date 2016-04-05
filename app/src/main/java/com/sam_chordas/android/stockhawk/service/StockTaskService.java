@@ -113,10 +113,10 @@ public class StockTaskService extends GcmTaskService {
                 // todo refactor
                 if (history_range == DetailActivity.HISTORY_1_DAY ||
                         history_range == DetailActivity.HISTORY_5_DAY ) {
-                    stockHistory = Utils.parseDayHistoryResults(getResponse);
+                    stockHistory = Utils.parseDayHistoryResults(getResponse, history_range);
                 }
                 else {
-                    stockHistory = Utils.parseHistoryResults(getResponse);
+                    stockHistory = Utils.parseHistoryResults(getResponse, history_range);
                 }
                 result = GcmNetworkManager.RESULT_SUCCESS;
             } catch (IOException e) {

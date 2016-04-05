@@ -5,16 +5,23 @@ import android.util.Log;
 
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.service.ChartLabel;
+import com.sam_chordas.android.stockhawk.service.ChartLabelFactory;
 import com.sam_chordas.android.stockhawk.service.HistoryData;
 import com.sam_chordas.android.stockhawk.service.HistoryItem;
 import com.sam_chordas.android.stockhawk.service.InvalidStockSymbolException;
+import com.sam_chordas.android.stockhawk.ui.DetailActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -62,6 +69,90 @@ public class Utils {
         return batchOperations;
     }
 
+    public static HistoryData parseHistoryResults(String jsonp, int dateRange) {
+        JSONObject jsonObject = null;
+        JSONArray resultsArray = null;
+        HistoryData h = new HistoryData();
+
+        try {
+            jsonObject = new JSONObject(removeJsonpWrapper(jsonp));
+
+            if (jsonObject != null && jsonObject.length() != 0) {
+
+                ChartLabel chartLabels = ChartLabelFactory.create(jsonObject, dateRange);
+                chartLabels.dump();
+
+                resultsArray = jsonObject.getJSONArray("series");
+                JSONObject closingValues = jsonObject.getJSONObject("ranges").getJSONObject("close");
+                String min = closingValues.getString("min");
+                String max = closingValues.getString("max");
+                h.setMinPrice(Float.valueOf(min));
+                h.setMaxPrice(Float.valueOf(max));
+
+                String label;
+                String timeStamp = "";
+                String key;
+                float closingPrice;
+
+                if (resultsArray != null && resultsArray.length() != 0) {
+                    for (int i = 0; i < resultsArray.length(); i++) {
+                        jsonObject = resultsArray.getJSONObject(i);
+                        closingPrice = formatPrice(jsonObject.getString("close"));
+                        key = jsonObject.getString("Date");
+                        label = chartLabels.getMatchingLabel(key);
+                        h.addEntry(new HistoryItem(timeStamp, label, closingPrice));
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "parseDayHistoryResults - String to JSON failed: " + e);
+        }
+
+        return h;
+    }
+
+    public static HistoryData parseDayHistoryResults(String jsonp, int dateRange) {
+        JSONObject jsonObject = null;
+        JSONArray resultsArray = null;
+        HistoryData h = new HistoryData();
+
+        try {
+            jsonObject = new JSONObject(removeJsonpWrapper(jsonp));
+
+            if (jsonObject != null && jsonObject.length() != 0) {
+                ChartLabel chartLabels = ChartLabelFactory.create(jsonObject, dateRange);
+                chartLabels.dump();
+                resultsArray = jsonObject.getJSONArray("series");
+                JSONObject closingValues = jsonObject.getJSONObject("ranges").getJSONObject("close");
+                String min = closingValues.getString("min");
+                String max = closingValues.getString("max");
+                h.setMinPrice(Float.valueOf(min));
+                h.setMaxPrice(Float.valueOf(max));
+                String label = "";
+                String timeStamp;
+                if (resultsArray != null && resultsArray.length() != 0) {
+                    for (int i = 0; i < resultsArray.length(); i++) {
+                        jsonObject = resultsArray.getJSONObject(i);
+                        float closingPrice = formatPrice(jsonObject.getString("close"));
+                        timeStamp = jsonObject.getString("Timestamp");
+                        h.addEntry(new HistoryItem(timeStamp, label, closingPrice));
+                    }
+                    /*
+                        for each label in label set
+                        get key
+                        find index of closest matching label value in data
+                        set label at that index with labelset.formattedLabel
+                     */
+                    h.addFormattedLabels(chartLabels);
+                }
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "parseDayHistoryResults - String to JSON failed: " + e);
+        }
+
+        return h;
+    }
+
     // strip off jsonp wrapper
     public static String removeJsonpWrapper(String jsonp) {
         return jsonp.substring(jsonp.indexOf("(") + 1, jsonp.lastIndexOf(")"));
@@ -72,121 +163,47 @@ public class Utils {
         return Float.parseFloat(Utils.truncateBidPrice(price));
     }
 
-    public static HistoryData parseHistoryResults(String jsonp) {
-        JSONObject jsonObject = null;
-        JSONArray resultsArray = null;
-        HistoryData h = new HistoryData();
+    // convert input in form: 20160229 to Day, Month (3 letter abbreviation), Year
+    public static String formatLabel(String dateString, int dateRange) {
+        String formattedLabel = "";
+        Date date;
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.US);
         try {
-            jsonObject = new JSONObject(removeJsonpWrapper(jsonp));
+            date = sdf.parse(dateString);
+//
+//            Calendar cal = Calendar.getInstance();
+//            cal.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+//            cal.setTime(date);
 
-            if (jsonObject != null && jsonObject.length() != 0) {
+            switch (dateRange) {
+                case DetailActivity.HISTORY_1_DAY:
+                default:
+                    throw new IllegalArgumentException("cannot handle timestamp at the moment");
 
-                JSONArray labels = jsonObject.getJSONArray("labels");
-                resultsArray = jsonObject.getJSONArray("series");
-                JSONObject closingValues = jsonObject.getJSONObject("ranges").getJSONObject("close");
-                String min = closingValues.getString("min");
-                String max = closingValues.getString("max");
-                h.setMinPrice(Float.valueOf(min));
-                h.setMaxPrice(Float.valueOf(max));
-
-
-                // dump labels
-                for (int j=0; j < labels.length(); j++) {
-                    //Log.d(TAG, "CHART LABEL: " + convertTimeStampToDateString(labels.getString(j)));
-                    Log.d(TAG, "CHART LABEL: " + labels.getString(j));
-                }
-
-                String label;
-                String timeStamp = "";
-                String chartLabel;
-                float closingPrice;
-
-                if (resultsArray != null && resultsArray.length() != 0) {
-                    for (int i = 0; i < resultsArray.length(); i++) {
-                        jsonObject = resultsArray.getJSONObject(i);
-                        closingPrice = formatPrice(jsonObject.getString("close"));
-                       // timeStamp = jsonObject.getString("Timestamp");
-                        chartLabel = jsonObject.getString("Date");
-                        label = "";
-                        for (int j = 0; j < labels.length(); j++) {
-                            if (labels.getString(j).equals(chartLabel))
-                                label = chartLabel;
-                        }
-                        h.addEntry(new HistoryItem(timeStamp, label, closingPrice));
-                    }
-
-
-
-//                    for (int j=0; j< labels.length(); j++) {
-//                        label = labels.getString(j);
-//                        // todo pick method
-//                        int index = h.findMatchingTimestamp(label);
-//                        if (index != -1) {
-//                            timeStamp = h.getItem(index).getTimeStamp();
-//                            label = convertTimeStampToDateString(timeStamp);
-//                            h.getItem(index).setLabel(label);
-//                        }
-//                    }
-                }
+                case DetailActivity.HISTORY_5_DAY:
+                    // m d
+                    formattedLabel = new SimpleDateFormat("LLL d").format(date);
+                    break;
+                case DetailActivity.HISTORY_1_MONTH:
+                    // m d
+                    formattedLabel = new SimpleDateFormat("LLL d").format(date);
+                    break;
+                case DetailActivity.HISTORY_6_MONTH:
+                    // m y
+                    formattedLabel = new SimpleDateFormat("LLL yy").format(date);
+                    break;
+                case DetailActivity.HISTORY_1_YEAR:
+                    // m y
+                    formattedLabel = new SimpleDateFormat("LLL yy").format(date);
+                    break;
             }
-        } catch (JSONException e) {
-            Log.e(TAG, "parseDayHistoryResults - String to JSON failed: " + e);
         }
-
-        return h;
-    }
-
-    public static HistoryData parseDayHistoryResults(String jsonp) {
-        JSONObject jsonObject = null;
-        JSONArray resultsArray = null;
-        HistoryData h = new HistoryData();
-
-        try {
-            jsonObject = new JSONObject(removeJsonpWrapper(jsonp));
-
-            if (jsonObject != null && jsonObject.length() != 0) {
-
-                JSONArray labels = jsonObject.getJSONArray("labels");
-                resultsArray = jsonObject.getJSONArray("series");
-                JSONObject closingValues = jsonObject.getJSONObject("ranges").getJSONObject("close");
-                String min = closingValues.getString("min");
-                String max = closingValues.getString("max");
-                h.setMinPrice(Float.valueOf(min));
-                h.setMaxPrice(Float.valueOf(max));
-
-                // dump labels
-                for (int j=0; j < labels.length(); j++) {
-                    Log.d(TAG, "CHART LABEL: " + convertTimeStampToDateString(labels.getString(j)));
-                }
-
-                String label = "";
-                String timeStamp;
-                if (resultsArray != null && resultsArray.length() != 0) {
-                    for (int i = 0; i < resultsArray.length(); i++) {
-                        jsonObject = resultsArray.getJSONObject(i);
-                        float closingPrice = formatPrice(jsonObject.getString("close"));
-                        timeStamp = jsonObject.getString("Timestamp");
-                        h.addEntry(new HistoryItem(timeStamp, label, closingPrice));
-                    }
-
-                    for (int j=0; j< labels.length(); j++) {
-                        label = labels.getString(j);
-                        // todo pick method
-                        int index = h.findMatchingTimestamp(label);
-                        if (index != -1) {
-                            timeStamp = h.getItem(index).getTimeStamp();
-                            label = convertTimeStampToDateString(timeStamp);
-                            h.getItem(index).setLabel(label);
-                        }
-                    }
-                }
-            }
-        } catch (JSONException e) {
-            Log.e(TAG, "parseDayHistoryResults - String to JSON failed: " + e);
+        catch (ParseException e) {
+            formattedLabel = "NA";
+            Log.e(TAG, e.getMessage());
         }
-
-        return h;
+        return formattedLabel;
     }
 
     private static boolean timeStampInRange(String labelString, String timestampString) {
@@ -199,7 +216,12 @@ public class Utils {
        return x > min && x < max;
     }
 
-    // todo match format of yql dates
+    public static boolean isEven(String timeLabel) {
+        int timeValue = Integer.valueOf(timeLabel);
+        return (timeValue % 2 == 0);
+    }
+
+
     public static String convertTimeStampToDateString(String timeStamp) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone("America/New_York"));
@@ -289,27 +311,5 @@ public class Utils {
             e.printStackTrace();
         }
         return builder.build();
-    }
-
-// todo update
-
-    public static String[] getDbColumns() {
-        return new String[] {
-                QuoteColumns._ID,
-                QuoteColumns.BIDPRICE,
-                QuoteColumns.CHANGE,
-                //  QuoteColumns.CREATED,
-//                QuoteColumns.DAYSHIGH,
-//                QuoteColumns.DAYSLOW,
-//                QuoteColumns.DIV_YIELD,
-                //   QuoteColumns.ISCURRENT,
-                QuoteColumns.ISUP,
-//                QuoteColumns.MARKET_CAP,
-//                QuoteColumns.NAME,
-//                QuoteColumns.OPEN_PRICE,
-//                QuoteColumns.PE_RATIO,
-                QuoteColumns.PERCENT_CHANGE,
-                QuoteColumns.SYMBOL
-        };
     }
 }

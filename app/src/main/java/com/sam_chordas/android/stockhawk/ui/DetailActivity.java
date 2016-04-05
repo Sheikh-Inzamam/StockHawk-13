@@ -287,13 +287,13 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
                 val = c.getString(c.getColumnIndex(QuoteColumns.PE_RATIO));
                 if (val.equals("null")) {
-                    val = "N/A";
+                    val = "-";
                 }
                 mPriceEarnings.setText(val);
 
                 val = c.getString(c.getColumnIndex(QuoteColumns.DIV_YIELD));
                 if (val.equals("null")) {
-                    val = "N/A";
+                    val = "-";
                 }
                 mDividendYield.setText(val);
 

@@ -2,11 +2,15 @@ package com.sam_chordas.android.stockhawk.service;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 
 public class HistoryData implements Parcelable {
+
+    private final static String TAG = HistoryData.class.getSimpleName();
 
     private float mMinPrice;
     private float mMaxPrice;
@@ -45,36 +49,63 @@ public class HistoryData implements Parcelable {
         return mMaxPrice;
     }
 
-    /*
-        add check by range
-        return index of first item found
-     */
-    public int findMatchingTimestamp(String label) {
+    public void addFormattedLabels(ChartLabel labelSet) {
+
+        for (LinkedHashMap.Entry<String, String> entry : labelSet.getEntrySet()) {
+            String key = entry.getKey();
+            String label = entry.getValue();
+            int index = findMatchingTimestamp(key);
+            if (index != -1) {
+                getItem(index).setLabel(label);
+            }
+        }
+    }
+
+
+
+    public int findMatchingTimestamp(String key) {
         int index = -1;
+
+        Log.d(TAG, "findMatchingTimestamp start - key: " + key);
+
         for (int i=0; i < mChartEntries.size(); i++) {
             HistoryItem item = mChartEntries.get(i);
             String timestamp = item.getTimeStamp();
-            if (timestamp.equals(label)) {
+            if (timestamp.equals(key)) {
                 index = i;
+                Log.d(TAG, "findMatchingTimestamp found MATCHING " );
                 break;
             }
-            if (timeStampInRange(label, timestamp)) {
+            if (timeStampInRange(key, timestamp)) {
                 index = i;
+                Log.d(TAG, "findMatchingTimestamp found IN RANGE " );
                 break;
             }
         }
+        if (index == -1) {
+            Log.d(TAG, "findMatchingTimestamp FAIL - index: " + index + " key: " + key);
+        }
+        else {
+            Log.d(TAG, "findMatchingTimestamp SUCCEED - index: " + index + " key: " + key);
+        }
+
         return index;
     }
 
-    private  boolean timeStampInRange(String labelString, String timestampString) {
-        long label = Long.parseLong(labelString);
-        long timestamp = Long.parseLong(timestampString);
+    private  boolean timeStampInRange(String keyString, String timeStampString) {
+        long key = Long.parseLong(keyString);
+        long timestamp = Long.parseLong(timeStampString);
+        long max = timestamp + 3600;
         // timestamp in milliseconds, labels separated by 3600ms, scaled up * 1000 to make 1 hour
-        return inRange(timestamp, label, label+3600);
+        boolean in = inRange(key, timestamp, max);
+        //boolean in = inRange(key, timestamp, timestamp + 3600);
+
+        Log.d(TAG, "----> inrange: " + in + " key: " + keyString + " min: " + timeStampString + " max: " + String.valueOf(max));
+        return in;
     }
 
     private boolean inRange(long x, long min, long max) {
-        return x > min && x < max;
+        return x >= min && x <= max;
     }
 
     public HistoryData(Parcel in) {
