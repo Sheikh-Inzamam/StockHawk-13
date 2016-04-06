@@ -33,7 +33,6 @@ public class ChartLabel {
         return mMap.entrySet();
     }
 
-    // todo make sure setting right fields
     public String getMatchingLabel(String key) {
         String label = mMap.get(key);
         if (label == null)

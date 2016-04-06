@@ -61,8 +61,6 @@ public class HistoryData implements Parcelable {
         }
     }
 
-
-
     public int findMatchingTimestamp(String key) {
         int index = -1;
 
@@ -82,25 +80,23 @@ public class HistoryData implements Parcelable {
                 break;
             }
         }
-        if (index == -1) {
+/*        if (index == -1) {
             Log.d(TAG, "findMatchingTimestamp FAIL - index: " + index + " key: " + key);
         }
         else {
             Log.d(TAG, "findMatchingTimestamp SUCCEED - index: " + index + " key: " + key);
-        }
+        }*/
 
         return index;
     }
 
-    private  boolean timeStampInRange(String keyString, String timeStampString) {
+    private boolean timeStampInRange(String keyString, String timeStampString) {
         long key = Long.parseLong(keyString);
         long timestamp = Long.parseLong(timeStampString);
         long max = timestamp + 3600;
         // timestamp in milliseconds, labels separated by 3600ms, scaled up * 1000 to make 1 hour
         boolean in = inRange(key, timestamp, max);
-        //boolean in = inRange(key, timestamp, timestamp + 3600);
-
-        Log.d(TAG, "----> inrange: " + in + " key: " + keyString + " min: " + timeStampString + " max: " + String.valueOf(max));
+        //Log.d(TAG, "----> inrange: " + in + " key: " + keyString + " min: " + timeStampString + " max: " + String.valueOf(max));
         return in;
     }
 

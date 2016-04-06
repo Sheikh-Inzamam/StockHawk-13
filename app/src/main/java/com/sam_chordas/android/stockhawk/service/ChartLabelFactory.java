@@ -13,13 +13,12 @@ public class ChartLabelFactory {
 
     public static ChartLabel create(JSONObject jsonObject, int dateRange) {
         final String TAG = ChartLabel.class.getSimpleName();
-
         ChartLabel labelSet = new ChartLabel();
         JSONArray labels;
         String label;
         String dateString;
-        String timeStampMin;
         String timeStamp;
+        String datePattern;
 
         try {
             labels = jsonObject.getJSONArray("labels");
@@ -30,37 +29,49 @@ public class ChartLabelFactory {
                         timeStamp = labels.getString(i);
                         label = Utils.convertTimeStampToDateString(timeStamp);
                         // only show labels for the even hours
-                        if (Utils.isEven(label))
+                        if (i % 2 == 0)
                             labelSet.add(timeStamp, label);
                      }
                     break;
 
                 case DetailActivity.HISTORY_5_DAY:
-                    // save the label/timestamp pairs to use in searching for the data item to label later
+                    datePattern = "LLL d";
                     JSONArray timeStampRange = jsonObject.getJSONArray("TimeStamp-Ranges");
-                    for (int j = 0; j < timeStampRange.length(); j++) {
-                        dateString = timeStampRange.getJSONObject(j).getString("date");
-                        timeStampMin = timeStampRange.getJSONObject(j).getString("min");
-                        labelSet.add(timeStampMin, dateString);
+                    for (int i = 0; i < timeStampRange.length(); i++) {
+                        dateString = timeStampRange.getJSONObject(i).getString("date");
+                        label = Utils.formatLabel(dateString, datePattern);
+                        timeStamp = timeStampRange.getJSONObject(i).getString("max");
+                        labelSet.add(timeStamp, label);
                     }
                     break;
 
                 case DetailActivity.HISTORY_1_MONTH:
-                case DetailActivity.HISTORY_6_MONTH:
+                    datePattern = "LLL d";
                     for (int i = 0; i < labels.length(); i++) {
                         dateString = labels.getString(i);
-                        label = Utils.formatLabel(dateString, dateRange);
+                        label = Utils.formatLabel(dateString, datePattern);
+                        labelSet.add(dateString, label);
+                    }
+                break;
+
+                case DetailActivity.HISTORY_6_MONTH:
+                    datePattern = "LLL yy";
+                    for (int i = 0; i < labels.length(); i++) {
+                        dateString = labels.getString(i);
+                        label = Utils.formatLabel(dateString, datePattern);
                         labelSet.add(dateString, label);
                     }
                     break;
 
                 case DetailActivity.HISTORY_1_YEAR:
+                    datePattern = "LLL yy";
                     for (int i = 0; i < labels.length(); i++) {
-                        dateString = labels.getString(i);
-                        label = Utils.formatLabel(dateString, dateRange);
                         // only show labels for four of the months
-                        if (i % 3 == 0)
+                        if (i % 3 == 0) {
+                            dateString = labels.getString(i);
+                            label = Utils.formatLabel(dateString, datePattern);
                             labelSet.add(dateString, label);
+                        }
                     }
                     break;
             }
@@ -75,3 +86,4 @@ public class ChartLabelFactory {
 }
 
 
+;
