@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 
 import com.db.chart.Tools;
 import com.db.chart.model.LineSet;
+import com.db.chart.view.ChartView;
 import com.db.chart.view.LineChartView;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.sam_chordas.android.stockhawk.R;
@@ -28,10 +30,7 @@ import com.sam_chordas.android.stockhawk.service.HistoryItem;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
 
-/*
-    handle
-        check is connected
- */
+
 public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String TAG = DetailActivity.class.getSimpleName();
@@ -48,13 +47,12 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private Cursor mCursor;
     private static final int DETAILS_CURSOR_LOADER_ID = 0;
     private String mSymbol;
-    
-    
+
 
     private TextView mName;
     private TextView mSymbolView;
     private TextView mPrice;
-    private TextView mChange;    
+    private TextView mChange;
     private TextView mOpen;
     private TextView mHigh;
     private TextView mLow;
@@ -69,7 +67,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private Button mHistory1Year;
 
 
-
     private BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -80,36 +77,31 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 return;
             }
 
-            // todo see if can consolidate
-            HistoryData stockHistory = intent.getExtras().getParcelable(StockTaskService.DETAIL_VALUES);
+            Paint gridPaint = new Paint();
+            gridPaint.setColor(Color.parseColor("#727272"));
+            gridPaint.setStyle(Paint.Style.STROKE);
+            gridPaint.setAntiAlias(true);
+            gridPaint.setStrokeWidth(Tools.fromDpToPx(1));
 
             LineSet data = new LineSet();
-            data.setColor(Color.GREEN)
-                    // todo gradient
-       /*     dataset.setColor(Color.parseColor("#53c1bd"))
-                    .setFill(Color.parseColor("#3d6c73"))
-                    .setGradientFill(new int[]{Color.parseColor("#364d5a"), Color.parseColor("#3f7178")}, null);
-                    .setFill(Color.parseColor("#3b8df2"))*/
-                    .setThickness(2)
+            data.setColor(Color.parseColor("#64B4BF"))
+                    .setGradientFill(new int[]{Color.parseColor("#364d5a"), Color.parseColor("#3f7178")}, null)
+                    .setThickness(Tools.fromDpToPx(1))
                     .beginAt(0);
 
-
-
-            for (HistoryItem item:stockHistory.getItems()) {
+            HistoryData stockHistory = intent.getExtras().getParcelable(StockTaskService.DETAIL_VALUES);
+            for (HistoryItem item : stockHistory.getItems()) {
                 data.addPoint(item.getLabel(), item.getPrice());
             }
-
             int minPrice = (int)Math.floor(stockHistory.getMinPrice());
             int maxPrice = (int)Math.ceil(stockHistory.getMaxPrice());
-            Log.d(TAG, "starting values MAX: " + stockHistory.getMaxPrice() + " MIN: " + stockHistory.getMinPrice());
-            Log.d(TAG, "MAX: " + maxPrice + " MIN: " + minPrice);
 
-            mChartView.setAxisBorderValues(minPrice, maxPrice);
-            mChartView.setLabelsColor(Color.WHITE);
-            mChartView.setBorderSpacing(Tools.fromDpToPx(15));
-            //mChartView.setLabelsFormat(new DecimalFormat("#.##"));
-            // mChartView.setGrid(ChartView.GridType.HORIZONTAL, 5, 1, new Paint())
-
+            mChartView.setAxisBorderValues(minPrice, maxPrice)
+                    .setLabelsColor(Color.WHITE)
+                    .setAxisLabelsSpacing(Tools.fromDpToPx(16))
+                    .setGrid(ChartView.GridType.FULL, gridPaint)
+                    .setXAxis(false)
+                    .setYAxis(false);
 
             mChartView.dismiss();
             mChartView.addData(data);
@@ -122,7 +114,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_detail);
-        mChartView = (LineChartView)findViewById(R.id.history_chart);
+        mChartView = (LineChartView) findViewById(R.id.history_chart);
 
         Intent intent = getIntent();
         // todo put symbol string in constant
@@ -132,26 +124,25 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
         getLoaderManager().initLoader(DETAILS_CURSOR_LOADER_ID, null, this);
 
-        mName = (TextView)findViewById(R.id.name);
-        mSymbolView = (TextView)findViewById(R.id.symbol);
-        mPrice = (TextView)findViewById(R.id.price);
-        mChange = (TextView)findViewById(R.id.change);
-        mOpen = (TextView)findViewById(R.id.open);
-        mHigh = (TextView)findViewById(R.id.high);
-        mLow = (TextView)findViewById(R.id.low);
-        mMarketCap = (TextView)findViewById(R.id.market_cap);
-        mPriceEarnings = (TextView)findViewById(R.id.pe);
-        mDividendYield = (TextView)findViewById(R.id.div_yield);
+        mName = (TextView) findViewById(R.id.name);
+        mSymbolView = (TextView) findViewById(R.id.symbol);
+        mPrice = (TextView) findViewById(R.id.price);
+        mChange = (TextView) findViewById(R.id.change);
+        mOpen = (TextView) findViewById(R.id.open);
+        mHigh = (TextView) findViewById(R.id.high);
+        mLow = (TextView) findViewById(R.id.low);
+        mMarketCap = (TextView) findViewById(R.id.market_cap);
+        mPriceEarnings = (TextView) findViewById(R.id.pe);
+        mDividendYield = (TextView) findViewById(R.id.div_yield);
 
-        mHistory1Day = (Button)findViewById(R.id.history_1d);
-        mHistory5Day = (Button)findViewById(R.id.history_5d);
-        mHistory1Month = (Button)findViewById(R.id.history_1m);
-        mHistory6Month = (Button)findViewById(R.id.history_6m);
-        mHistory1Year = (Button)findViewById(R.id.history_1y);
+        mHistory1Day = (Button) findViewById(R.id.history_1d);
+        mHistory5Day = (Button) findViewById(R.id.history_5d);
+        mHistory1Month = (Button) findViewById(R.id.history_1m);
+        mHistory6Month = (Button) findViewById(R.id.history_6m);
+        mHistory1Year = (Button) findViewById(R.id.history_1y);
 
         // todo kick off default history chart - 1 day
         showHistoryChart(symbol, DetailActivity.HISTORY_1_DAY);
-
         setupHistoryButtons();
     }
 
@@ -215,7 +206,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // This narrows the return to only the stocks that are most current.
         return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
-                new String[] {
+                new String[]{
                         QuoteColumns._ID,
                         QuoteColumns.SYMBOL,
                         QuoteColumns.BIDPRICE,
@@ -237,27 +228,25 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
         mCursor = data;
-
         if (mCursor != null) {
             Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
-                   new String[] {
-                           QuoteColumns.SYMBOL,
-                           QuoteColumns.BIDPRICE,
-                           QuoteColumns.PERCENT_CHANGE,
-                           QuoteColumns.CHANGE,
-                           QuoteColumns.ISUP,
-                           QuoteColumns.NAME,
-                           QuoteColumns.OPEN_PRICE,
-                           QuoteColumns.DAYSLOW,
-                           QuoteColumns.DAYSHIGH,
-                           QuoteColumns.PE_RATIO,
-                           QuoteColumns.DIV_YIELD,
-                           QuoteColumns.MARKET_CAP
-                   },
-                   QuoteColumns.SYMBOL + "= ?",
-                   new String[]{mSymbol}, null);
+                    new String[]{
+                            QuoteColumns.SYMBOL,
+                            QuoteColumns.BIDPRICE,
+                            QuoteColumns.PERCENT_CHANGE,
+                            QuoteColumns.CHANGE,
+                            QuoteColumns.ISUP,
+                            QuoteColumns.NAME,
+                            QuoteColumns.OPEN_PRICE,
+                            QuoteColumns.DAYSLOW,
+                            QuoteColumns.DAYSHIGH,
+                            QuoteColumns.PE_RATIO,
+                            QuoteColumns.DIV_YIELD,
+                            QuoteColumns.MARKET_CAP
+                    },
+                    QuoteColumns.SYMBOL + "= ?",
+                    new String[]{mSymbol}, null);
 
             if (c.getCount() != 0) {
                 c.moveToFirst();
@@ -265,7 +254,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
                 // dump columns and values
                 String[] columnNames = c.getColumnNames();
-                for (String name:columnNames) {
+                for (String name : columnNames) {
                     int index = c.getColumnIndex(name);
                     int type = c.getType(index);
                     // ignore non-string data
@@ -304,9 +293,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-       // mCursorAdapter.swapCursor(null);
+        // mCursorAdapter.swapCursor(null);
         // todo what here?
     }
-
-
 }

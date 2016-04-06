@@ -249,9 +249,9 @@
             android:id="@+id/history_chart"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="20dp"
 
-            chart:chart_fontSize="16dp"/>
+            chart:chart_fontSize="16dp"
+            android:padding="24dp" />
 
     </LinearLayout>
 
