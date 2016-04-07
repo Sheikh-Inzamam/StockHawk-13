@@ -9,7 +9,7 @@ import android.support.v7.widget.RecyclerView;
  * Created by sam_chordas on 10/6/15.
  *  Credit to skyfishjy gist:
  *    https://gist.github.com/skyfishjy/443b7448f59be978bc59
- * for the CursorRecyclerViewApater.java code and idea.
+ * for the CursorRecyclerViewAdapter.java code and idea.
  */
 public abstract class CursorRecyclerViewAdapter <VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH>{
   private static final String LOG_TAG = CursorRecyclerViewAdapter.class.getSimpleName();
@@ -17,6 +17,7 @@ public abstract class CursorRecyclerViewAdapter <VH extends RecyclerView.ViewHol
   private boolean dataIsValid;
   private int rowIdColumn;
   private DataSetObserver mDataSetObserver;
+
   public CursorRecyclerViewAdapter(Context context, Cursor cursor){
     mCursor = cursor;
     dataIsValid = cursor != null;

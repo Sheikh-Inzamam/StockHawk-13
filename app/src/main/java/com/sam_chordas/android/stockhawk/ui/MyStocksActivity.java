@@ -91,6 +91,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                         mContext.startActivity(intent);
                     }
                 }));
+
         recyclerView.setAdapter(mCursorAdapter);
 
 
