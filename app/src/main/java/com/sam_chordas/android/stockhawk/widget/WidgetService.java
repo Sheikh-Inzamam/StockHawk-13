@@ -8,6 +8,7 @@ import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 
 public class WidgetService extends RemoteViewsService  {
@@ -20,6 +21,7 @@ public class WidgetService extends RemoteViewsService  {
 
 class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
+    private static final String TAG = WidgetRemoteViewsFactory.class.getSimpleName();
     private Context mContext;
     private int mWidgetId;
     private Cursor mCursor;
@@ -34,17 +36,14 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
     public void onDataSetChanged() {
         closeCursor();
 
+        // get current values
         mCursor = mContext.getContentResolver().query(
-                QuoteProvider.Quotes.CONTENT_URI, null, null, null, null);
-//                new String[]{
-//                        QuoteColumns.SYMBOL,
-//                        QuoteColumns.BIDPRICE,
-//                        QuoteColumns.PERCENT_CHANGE,
-//                        QuoteColumns.CHANGE,
-//                        QuoteColumns.ISUP
-//                },
-//                QuoteColumns.SYMBOL + "= ?",
-//                new String[]{mSymbol}, null);
+                QuoteProvider.Quotes.CONTENT_URI,
+                new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
+                        QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
+                QuoteColumns.ISCURRENT + " = ?",
+                new String[]{"1"},
+                null);
 
         if (mCursor.getCount() != 0) {
             mCursor.moveToFirst();
@@ -53,30 +52,18 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
 
     @Override
     public RemoteViews getViewAt(int position) {
-        RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.list_item_quote);
-        
+        RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.widget_list_item_quote);
         if (mCursor.moveToPosition(position)) {
-            // get data here
-
             rv.setTextViewText(R.id.stock_symbol, mCursor.getString(mCursor.getColumnIndex("symbol")));
             rv.setTextViewText(R.id.bid_price, mCursor.getString(mCursor.getColumnIndex("bid_price")));
             rv.setTextViewText(R.id.change, mCursor.getString(mCursor.getColumnIndex("percent_change")));
-
-            /*
-           if (cursor.getInt(cursor.getColumnIndex("is_up")) == 1) {
-                viewHolder.change.setBackground(mContext.getResources().getDrawable(R.drawable.percent_change_pill_green));
-            } else {
-                viewHolder.change.setBackground(mContext.getResources().getDrawable(R.drawable.percent_change_pill_red));
+            if (mCursor.getInt(mCursor.getColumnIndex("is_up")) == 1) {
+                rv.setInt(R.id.change, "setBackgroundResource", R.drawable.percent_change_pill_green);
             }
-            if (Utils.showPercent){
-                viewHolder.change.setText());
-            } else{
-                viewHolder.change.setText(cursor.getString(cursor.getColumnIndex("change")));
+            else {
+                rv.setInt(R.id.change, "setBackgroundResource", R.drawable.percent_change_pill_red);
             }
-            */
         }
-        
-        // todo fill in view with data from content provider
         return rv;
     }
 
@@ -103,7 +90,7 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
 
     @Override
     public int getCount() {
-        return mCursor.getCount();
+        return mCursor != null ? mCursor.getCount() : 0;
     }
 
     @Override
