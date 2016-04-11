@@ -4,7 +4,6 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
@@ -28,16 +27,12 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
     private Cursor mCursor;
 
     public WidgetRemoteViewsFactory(Context context, Intent intent) {
-        Log.d(TAG, "--------- onDataSetChanged ---------");
         mContext = context;
         mWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
     }
 
     @Override
     public void onDataSetChanged() {
-
-        Log.d(TAG, "--------- onDataSetChanged ---------");
-
         closeCursor();
         // get current values
         mCursor = mContext.getContentResolver().query(

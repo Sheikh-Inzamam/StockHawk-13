@@ -14,7 +14,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.db.chart.Tools;
@@ -48,7 +48,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private static final int DETAILS_CURSOR_LOADER_ID = 0;
     private String mSymbol;
 
-
     private TextView mName;
     private TextView mSymbolView;
     private TextView mPrice;
@@ -60,11 +59,11 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private TextView mPriceEarnings;
     private TextView mDividendYield;
 
-    private Button mHistory1Day;
-    private Button mHistory5Day;
-    private Button mHistory1Month;
-    private Button mHistory6Month;
-    private Button mHistory1Year;
+    private RadioButton mHistory1Day;
+    private RadioButton mHistory5Day;
+    private RadioButton mHistory1Month;
+    private RadioButton mHistory6Month;
+    private RadioButton mHistory1Year;
 
 
     private BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
@@ -117,7 +116,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mChartView = (LineChartView) findViewById(R.id.history_chart);
 
         Intent intent = getIntent();
-        // todo put symbol string in constant
         String symbol = intent.getStringExtra("symbol");
         Log.d(TAG, "symbol is: " + symbol);
         mSymbol = symbol;
@@ -135,14 +133,15 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mPriceEarnings = (TextView) findViewById(R.id.pe);
         mDividendYield = (TextView) findViewById(R.id.div_yield);
 
-        mHistory1Day = (Button) findViewById(R.id.history_1d);
-        mHistory5Day = (Button) findViewById(R.id.history_5d);
-        mHistory1Month = (Button) findViewById(R.id.history_1m);
-        mHistory6Month = (Button) findViewById(R.id.history_6m);
-        mHistory1Year = (Button) findViewById(R.id.history_1y);
+        mHistory1Day = (RadioButton) findViewById(R.id.history_1d);
+        mHistory5Day = (RadioButton) findViewById(R.id.history_5d);
+        mHistory1Month = (RadioButton) findViewById(R.id.history_1m);
+        mHistory6Month = (RadioButton) findViewById(R.id.history_6m);
+        mHistory1Year = (RadioButton) findViewById(R.id.history_1y);
 
-        // todo kick off default history chart - 1 day
+        // show default history chart - 1 day
         showHistoryChart(symbol, DetailActivity.HISTORY_1_DAY);
+        mHistory1Day.setChecked(true);
         setupHistoryButtons();
     }
 
@@ -182,7 +181,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
     private void showHistoryChart(String symbol, int range) {
         mServiceIntent = new Intent(this, StockIntentService.class);
-        // todo add params for date range
         mServiceIntent.putExtra("tag", "details");
         mServiceIntent.putExtra("symbol", symbol);
         mServiceIntent.putExtra("history_range", range);
@@ -251,28 +249,23 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             if (c.getCount() != 0) {
                 c.moveToFirst();
 
-
-                // dump columns and values
-                String[] columnNames = c.getColumnNames();
-                for (String name : columnNames) {
-                    int index = c.getColumnIndex(name);
-                    int type = c.getType(index);
-                    // ignore non-string data
-                    if (type == Cursor.FIELD_TYPE_STRING) {
-                        String value = c.getString(index);
-                        Log.d(TAG, "column: " + name + " value: " + value);
-                    }
-                }
-
                 String val;
                 mName.setText(c.getString(c.getColumnIndex(QuoteColumns.NAME)));
-                mSymbolView.setText(c.getString(c.getColumnIndex(QuoteColumns.SYMBOL)));
+                val = c.getString(c.getColumnIndex(QuoteColumns.SYMBOL));
+                mSymbolView.setText(val.toUpperCase());
                 mPrice.setText(c.getString(c.getColumnIndex(QuoteColumns.BIDPRICE)));
                 mChange.setText(c.getString(c.getColumnIndex(QuoteColumns.PERCENT_CHANGE)));
                 mOpen.setText(c.getString(c.getColumnIndex(QuoteColumns.OPEN_PRICE)));
                 mHigh.setText(c.getString(c.getColumnIndex(QuoteColumns.DAYSHIGH)));
                 mLow.setText(c.getString(c.getColumnIndex(QuoteColumns.DAYSLOW)));
                 mMarketCap.setText(c.getString(c.getColumnIndex(QuoteColumns.MARKET_CAP)));
+
+                if (c.getInt(c.getColumnIndex("is_up")) == 1) {
+                    mChange.setBackground(getApplicationContext().getResources().getDrawable(R.drawable.percent_change_pill_green));
+                } else {
+                    mChange.setBackground(getApplicationContext().getResources().getDrawable(R.drawable.percent_change_pill_red));
+                }
+
 
                 val = c.getString(c.getColumnIndex(QuoteColumns.PE_RATIO));
                 if (val.equals("null")) {
@@ -293,7 +286,5 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        // mCursorAdapter.swapCursor(null);
-        // todo what here?
     }
 }
