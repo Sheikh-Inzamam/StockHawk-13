@@ -8,7 +8,7 @@
     >
     <TextView
         android:id="@+id/stock_symbol"
-        style="@style/StockSymbolTextStyle"
+        style="@style/WidgetStockSymbolTextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="left|center_vertical"
@@ -22,7 +22,7 @@
         >
         <TextView
             android:id="@+id/bid_price"
-            style="@style/BidPriceTextStyle"
+            style="@style/WidgetBidPriceTextStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingRight="10sp"
@@ -32,7 +32,7 @@
             android:id="@+id/change"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/PercentChangeTextStyle"
+            style="@style/WidgetPercentChangeTextStyle"
             android:background="@drawable/percent_change_pill"
             android:paddingLeft="3dp"
             android:paddingRight="3dp"

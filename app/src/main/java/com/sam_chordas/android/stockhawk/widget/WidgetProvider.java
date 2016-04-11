@@ -11,12 +11,8 @@ import com.sam_chordas.android.stockhawk.R;
 
 
 public class WidgetProvider extends AppWidgetProvider {
-    private static final String TAG = WidgetProvider.class.getSimpleName();
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        super.onReceive(context, intent);
-    }
+    private static final String TAG = WidgetProvider.class.getSimpleName();
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -31,3 +27,4 @@ public class WidgetProvider extends AppWidgetProvider {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 }
+
