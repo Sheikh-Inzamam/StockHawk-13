@@ -20,7 +20,7 @@
     <item name="android:textAllCaps">true</item>
   </style>
   <style name="WidgetTitleTextStyle">
-    <item name="android:textSize">18sp</item>
+    <item name="android:textSize">14sp</item>
   </style>
   <style name="WidgetPercentChangeTextStyle">
     <item name="android:textSize">14sp</item>

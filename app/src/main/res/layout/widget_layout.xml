@@ -7,6 +7,9 @@
         android:padding="@dimen/widget_margin"
         android:background="@color/background_floating_material_dark">
 
+
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,13 +18,31 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="StockHawk"
+            android:text="Stock Quotes"
             android:id="@+id/widget_title"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp"
             style="@style/WidgetTitleTextStyle"
             android:textColor="@android:color/white" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="right"
+            >
+
+            <ImageButton
+                android:layout_width="24dp"
+                android:layout_height="fill_parent"
+                android:id="@+id/refresh_button"
+                android:layout_marginRight="12dp"
+                android:src="@drawable/abc_ic_go_search_api_mtrl_alpha" />
+        </LinearLayout>
+
     </LinearLayout>
+
+
+
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -39,3 +60,21 @@
     </FrameLayout>
   
   </LinearLayout>
+
+
+<!--    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="StockHawk"
+            android:id="@+id/widget_title"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            style="@style/WidgetTitleTextStyle"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+-->
