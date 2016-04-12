@@ -76,6 +76,13 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 return;
             }
 
+            HistoryData stockHistory = intent.getExtras().getParcelable(StockTaskService.DETAIL_VALUES);
+            if (stockHistory.getItems().isEmpty()) {
+                // todo report error
+                Log.e(TAG, "Details query parsing failed...");
+                return;
+            }
+
             Paint gridPaint = new Paint();
             gridPaint.setColor(Color.parseColor("#727272"));
             gridPaint.setStyle(Paint.Style.STROKE);
@@ -88,7 +95,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                     .setThickness(Tools.fromDpToPx(1))
                     .beginAt(0);
 
-            HistoryData stockHistory = intent.getExtras().getParcelable(StockTaskService.DETAIL_VALUES);
             for (HistoryItem item : stockHistory.getItems()) {
                 data.addPoint(item.getLabel(), item.getPrice());
             }

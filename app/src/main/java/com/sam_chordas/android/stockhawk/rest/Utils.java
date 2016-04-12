@@ -10,6 +10,7 @@ import com.sam_chordas.android.stockhawk.service.ChartLabelFactory;
 import com.sam_chordas.android.stockhawk.service.HistoryData;
 import com.sam_chordas.android.stockhawk.service.HistoryItem;
 import com.sam_chordas.android.stockhawk.service.InvalidStockSymbolException;
+import com.sam_chordas.android.stockhawk.ui.DetailActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,12 +68,11 @@ public class Utils {
         return batchOperations;
     }
 
-    public static HistoryData parseHistoryResults(String jsonp, int dateRange) {
+    // todo - test combined intraday and multi day parsing
+    public static HistoryData parseHistoryData(String jsonp, int dateRange, HistoryData h) {
         JSONObject jsonObject, closingValues;
         JSONArray resultsArray;
-        String label, key;
-        HistoryData h = new HistoryData();
-
+        String timeStamp;
         try {
             jsonObject = new JSONObject(removeJsonpWrapper(jsonp));
 
@@ -87,49 +87,55 @@ public class Utils {
                 if (resultsArray != null && resultsArray.length() != 0) {
                     for (int i = 0; i < resultsArray.length(); i++) {
                         jsonObject = resultsArray.getJSONObject(i);
-                        key = jsonObject.getString("Date");
-                        label = chartLabels.getMatchingLabel(key);
-                        h.addEntry(new HistoryItem("", label, formatPrice(jsonObject.getString("close"))));
+                        timeStamp = getTimeStamp(jsonObject);
+                        h.addEntry(new HistoryItem(timeStamp, "", formatPrice(jsonObject.getString("close"))));
                     }
+                    h.addFormattedLabels(chartLabels, findMatchingDateInRange(dateRange));
                 }
             }
         } catch (JSONException e) {
-            Log.e(TAG, "parseDayHistoryResults - String to JSON failed: " + e);
+            Log.e(TAG, "parseHistoryData - String to JSON failed: " + e);
         }
 
         return h;
     }
 
-    public static HistoryData parseDayHistoryResults(String jsonp, int dateRange) {
-        JSONObject jsonObject, closingValues;
-        JSONArray resultsArray;
-        String timeStamp;
-        HistoryData h = new HistoryData();
+    // single day queries do not necessarily have matching labels so need to find closest matching timestamp in a range
+    private static boolean findMatchingDateInRange(int dateRange) {
+        return (dateRange == DetailActivity.HISTORY_1_DAY
+                || dateRange == DetailActivity.HISTORY_5_DAY);
+    }
 
-        try {
-            jsonObject = new JSONObject(removeJsonpWrapper(jsonp));
-            if (jsonObject != null && jsonObject.length() != 0) {
-                ChartLabel chartLabels = ChartLabelFactory.create(jsonObject, dateRange);
-                chartLabels.dump();
-                resultsArray = jsonObject.getJSONArray("series");
-                closingValues = jsonObject.getJSONObject("ranges").getJSONObject("close");
-                h.setMinPrice(Float.valueOf(closingValues.getString("min")));
-                h.setMaxPrice(Float.valueOf(closingValues.getString("max")));
-
-                if (resultsArray != null && resultsArray.length() != 0) {
-                    for (int i = 0; i < resultsArray.length(); i++) {
-                        jsonObject = resultsArray.getJSONObject(i);
-                        timeStamp = jsonObject.getString("Timestamp");
-                        h.addEntry(new HistoryItem(timeStamp, "", formatPrice(jsonObject.getString("close"))));
-                    }
-                    h.addFormattedLabels(chartLabels);
-                }
-            }
-        } catch (JSONException e) {
-            Log.e(TAG, "parseDayHistoryResults - String to JSON failed: " + e);
+    // use timestamp or date as key, depending on which is available
+    private static String getTimeStamp(JSONObject jsonObject) {
+        String timeStamp = jsonObject.optString("Timestamp");
+        if (timeStamp.isEmpty()) {
+            timeStamp = jsonObject.optString("Date", "fail");
         }
+        return timeStamp;
+    }
 
-        return h;
+    public static String getRangeFlag(int range) {
+        String rangeFlag;
+        switch (range) {
+            case DetailActivity.HISTORY_1_DAY:
+            default:
+                rangeFlag = "1d";
+                break;
+            case DetailActivity.HISTORY_5_DAY:
+                rangeFlag = "5d";
+                break;
+            case DetailActivity.HISTORY_1_MONTH:
+                rangeFlag = "1m";
+                break;
+            case DetailActivity.HISTORY_6_MONTH:
+                rangeFlag = "6m";
+                break;
+            case DetailActivity.HISTORY_1_YEAR:
+                rangeFlag = "1y";
+                break;
+        }
+        return rangeFlag;
     }
 
     // strip off jsonp wrapper
@@ -161,6 +167,7 @@ public class Utils {
         return formattedLabel;
     }
 
+    // note time zone is set to where exchange resides: NY
     public static String convertTimeStampToDateString(String timeStamp) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone("America/New_York"));

@@ -18,7 +18,6 @@ import com.google.android.gms.gcm.TaskParams;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
-import com.sam_chordas.android.stockhawk.ui.DetailActivity;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -62,7 +61,6 @@ public class StockTaskService extends GcmTaskService {
         if (mContext == null) {
             mContext = this;
         }
-
         if (params.getTag().equals("details")) {
             return handleDetailsQuery(params);
         } else {
@@ -71,61 +69,24 @@ public class StockTaskService extends GcmTaskService {
     }
 
     private int handleDetailsQuery(TaskParams params) {
-        StringBuilder urlStringBuilder = new StringBuilder();
         String stockSymbol = params.getExtras().getString("symbol");
         int history_range = params.getExtras().getInt("history_range");
-        String rangeFlag;
-        // todo encapsulate
-        switch (history_range) {
-            case DetailActivity.HISTORY_1_DAY:
-            default:
-                rangeFlag = "1d";
-                break;
-            case DetailActivity.HISTORY_5_DAY:
-                rangeFlag = "5d";
-                break;
-            case DetailActivity.HISTORY_1_MONTH:
-                rangeFlag = "1m";
-                break;
-            case DetailActivity.HISTORY_6_MONTH:
-                rangeFlag = "6m";
-                break;
-            case DetailActivity.HISTORY_1_YEAR:
-                rangeFlag = "1y";
-                break;
-        }
 
-        // todo refactor
         String baseUrl = "http://chartapi.finance.yahoo.com/instrument/1.0/%s/chartdata;type=quote;range=%s/json";
-        String finalurl = String.format(baseUrl, stockSymbol, rangeFlag);
-        urlStringBuilder.append(finalurl);
+        String finalurl = String.format(baseUrl, stockSymbol, Utils.getRangeFlag(history_range));
+        Log.d(TAG, "Query URL: " + finalurl);
 
-        String urlString;
-        String getResponse;
-        HistoryData stockHistory = null;
+        HistoryData stockHistory = new HistoryData();
         int result = GcmNetworkManager.RESULT_FAILURE;
-
-        if (urlStringBuilder != null) {
-            urlString = urlStringBuilder.toString();
-            Log.d(TAG, "Query URL: " + urlString);
-            try {
-                getResponse = fetchData(urlString);
-                // todo refactor
-                if (history_range == DetailActivity.HISTORY_1_DAY ||
-                        history_range == DetailActivity.HISTORY_5_DAY ) {
-                    stockHistory = Utils.parseDayHistoryResults(getResponse, history_range);
-                }
-                else {
-                    stockHistory = Utils.parseHistoryResults(getResponse, history_range);
-                }
-                result = GcmNetworkManager.RESULT_SUCCESS;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            String getResponse = fetchData(finalurl);
+            stockHistory = Utils.parseHistoryData(getResponse, history_range, stockHistory);
+            result = GcmNetworkManager.RESULT_SUCCESS;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         sendDetailResults(stockHistory, result);
         return result;
-
     }
 
     // todo move to details model

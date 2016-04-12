@@ -49,19 +49,19 @@ public class HistoryData implements Parcelable {
         return mMaxPrice;
     }
 
-    public void addFormattedLabels(ChartLabel labelSet) {
+    public void addFormattedLabels(ChartLabel labelSet, boolean exactMatch) {
 
         for (LinkedHashMap.Entry<String, String> entry : labelSet.getEntrySet()) {
             String key = entry.getKey();
             String label = entry.getValue();
-            int index = findMatchingTimestamp(key);
+            int index = findMatchingTimestamp(key, exactMatch);
             if (index != -1) {
                 getItem(index).setLabel(label);
             }
         }
     }
 
-    public int findMatchingTimestamp(String key) {
+    public int findMatchingTimestamp(String key, boolean findInRange) {
         int index = -1;
 
         Log.d(TAG, "findMatchingTimestamp start - key: " + key);
@@ -74,18 +74,19 @@ public class HistoryData implements Parcelable {
                 Log.d(TAG, "findMatchingTimestamp found MATCHING " );
                 break;
             }
-            if (timeStampInRange(key, timestamp)) {
+            // dont look for timestamp in range if key is date string that is likely to have exact match
+            if (findInRange && timeStampInRange(key, timestamp)) {
                 index = i;
                 Log.d(TAG, "findMatchingTimestamp found IN RANGE " );
                 break;
             }
         }
-/*        if (index == -1) {
+       if (index == -1) {
             Log.d(TAG, "findMatchingTimestamp FAIL - index: " + index + " key: " + key);
         }
         else {
             Log.d(TAG, "findMatchingTimestamp SUCCEED - index: " + index + " key: " + key);
-        }*/
+        }
 
         return index;
     }

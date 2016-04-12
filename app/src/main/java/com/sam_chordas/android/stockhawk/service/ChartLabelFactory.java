@@ -26,11 +26,12 @@ public class ChartLabelFactory {
                 case DetailActivity.HISTORY_1_DAY:
                 default:
                     for (int i = 0; i < labels.length(); i++) {
-                        timeStamp = labels.getString(i);
-                        label = Utils.convertTimeStampToDateString(timeStamp);
                         // only show labels for the even hours
-                        if (i % 2 == 0)
+                        if (i % 2 == 0) {
+                            timeStamp = labels.getString(i);
+                            label = Utils.convertTimeStampToDateString(timeStamp);
                             labelSet.add(timeStamp, label);
+                        }
                      }
                     break;
 
