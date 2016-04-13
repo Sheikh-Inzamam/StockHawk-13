@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
+import com.sam_chordas.android.stockhawk.data.Constants;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
@@ -39,9 +40,7 @@ public class StockTaskService extends GcmTaskService {
     private StringBuilder mStoredSymbols = new StringBuilder();
     private boolean isUpdate;
 
-    public StockTaskService() {
-    }
-
+    public StockTaskService() { }
     public StockTaskService(Context context) {
         mContext = context;
     }
@@ -50,18 +49,16 @@ public class StockTaskService extends GcmTaskService {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
-
         Response response = client.newCall(request).execute();
         return response.body().string();
     }
 
     @Override
     public int onRunTask(TaskParams params) {
-
         if (mContext == null) {
             mContext = this;
         }
-        if (params.getTag().equals("details")) {
+        if (params.getTag().equals(Constants.DETAILS)) {
             return handleDetailsQuery(params);
         } else {
             return handleQuoteQuery(params);
@@ -69,8 +66,8 @@ public class StockTaskService extends GcmTaskService {
     }
 
     private int handleDetailsQuery(TaskParams params) {
-        String stockSymbol = params.getExtras().getString("symbol");
-        int history_range = params.getExtras().getInt("history_range");
+        String stockSymbol = params.getExtras().getString(Constants.SYMBOL);
+        int history_range = params.getExtras().getInt(Constants.RANGE);
 
         String baseUrl = "http://chartapi.finance.yahoo.com/instrument/1.0/%s/chartdata;type=quote;range=%s/json";
         String finalurl = String.format(baseUrl, stockSymbol, Utils.getRangeFlag(history_range));
@@ -89,16 +86,11 @@ public class StockTaskService extends GcmTaskService {
         return result;
     }
 
-    // todo move to details model
-    public static final String DETAIL_INTENT = "detail_intent";
-    public static final String DETAIL_VALUES = "detail_values";
-    public static final String DETAIL_RESULT = "detail_result";
-
     private void sendDetailResults(HistoryData stockHistory, int resultCode) {
-        Intent intent = new Intent(DETAIL_INTENT);
-        intent.putExtra(DETAIL_RESULT, resultCode);
+        Intent intent = new Intent(Constants.DETAIL_INTENT);
+        intent.putExtra(Constants.DETAIL_RESULT, resultCode);
         if (resultCode == GcmNetworkManager.RESULT_SUCCESS) {
-            intent.putExtra(DETAIL_VALUES, stockHistory);
+            intent.putExtra(Constants.DETAIL_VALUES, stockHistory);
         }
         mContext.sendBroadcast(intent);
     }
@@ -115,7 +107,7 @@ public class StockTaskService extends GcmTaskService {
             e.printStackTrace();
         }
 
-        if (params.getTag().equals("init") || params.getTag().equals("periodic")) {
+        if (params.getTag().equals(Constants.INIT) || params.getTag().equals(Constants.PERIODIC)) {
             isUpdate = true;
             initQueryCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                     new String[]{"Distinct " + QuoteColumns.SYMBOL}, null,
@@ -137,7 +129,7 @@ public class StockTaskService extends GcmTaskService {
                 initQueryCursor.moveToFirst();
                 for (int i = 0; i < initQueryCursor.getCount(); i++) {
                     mStoredSymbols.append("\"" +
-                            initQueryCursor.getString(initQueryCursor.getColumnIndex("symbol")) + "\",");
+                            initQueryCursor.getString(initQueryCursor.getColumnIndex(QuoteColumns.SYMBOL)) + "\",");
                     initQueryCursor.moveToNext();
                 }
                 mStoredSymbols.replace(mStoredSymbols.length() - 1, mStoredSymbols.length(), ")");
@@ -149,10 +141,9 @@ public class StockTaskService extends GcmTaskService {
             }
 
         // add
-        } else if (params.getTag().equals("add")) {
+        } else if (params.getTag().equals(Constants.ADD)) {
             isUpdate = false;
-            // get symbol from params.getExtra and build query
-            String stockInput = params.getExtras().getString("symbol");
+            String stockInput = params.getExtras().getString(Constants.SYMBOL);
             try {
                 urlStringBuilder.append(URLEncoder.encode("\"" + stockInput + "\")", "UTF-8"));
             } catch (UnsupportedEncodingException e) {

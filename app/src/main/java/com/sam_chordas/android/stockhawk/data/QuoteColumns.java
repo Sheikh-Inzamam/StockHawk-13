@@ -33,44 +33,24 @@ public class QuoteColumns {
     @DataType(DataType.Type.INTEGER) @NotNull
     public static final String ISCURRENT = "is_current";
 
-    @DataType(DataType.Type.TEXT) //@NotNull
-    public static final String NAME = "name"; //"Name";
+    @DataType(DataType.Type.TEXT)
+    public static final String NAME = "name";
 
     @DataType(DataType.Type.TEXT) @NotNull
-    public static final String OPEN_PRICE = "open_price";//"Open";
+    public static final String OPEN_PRICE = "open_price";
 
     @DataType(DataType.Type.TEXT) @NotNull
-    public static final String DAYSHIGH = "dayshigh";//"daysHigh";
+    public static final String DAYSHIGH = "dayshigh";
 
     @DataType(DataType.Type.TEXT) @NotNull
-    public static final String DAYSLOW = "dayslow";//"daysLow";
+    public static final String DAYSLOW = "dayslow";
 
     @DataType(DataType.Type.TEXT)
-    public static final String DIV_YIELD = "dividend_yield";//"DividendYield";
+    public static final String DIV_YIELD = "dividend_yield";
 
     @DataType(DataType.Type.TEXT) @NotNull
-    public static final String PE_RATIO = "pe_ratio";//"PERatio";
+    public static final String PE_RATIO = "pe_ratio";
 
     @DataType(DataType.Type.TEXT) @NotNull
-    public static final String MARKET_CAP = "market_cap";//"MarketCapitalization";
+    public static final String MARKET_CAP = "market_cap";
 }
-
-/*
-   public static final String[] COLUMNS = new String[] {
-            QuoteColumns._ID,
-            QuoteColumns.BIDPRICE,
-            QuoteColumns.CHANGE,
-            //  QuoteColumns.CREATED,
-            QuoteColumns.DAYSHIGH,
-            QuoteColumns.DAYSLOW,
-            QuoteColumns.DIV_YIELD,
-            //   QuoteColumns.ISCURRENT,
-            QuoteColumns.ISUP,
-            QuoteColumns.MARKET_CAP,
-            QuoteColumns.NAME,
-            QuoteColumns.OPEN_PRICE,
-            QuoteColumns.PE_RATIO,
-            QuoteColumns.PERCENT_CHANGE,
-            QuoteColumns.SYMBOL
-        };
-*/

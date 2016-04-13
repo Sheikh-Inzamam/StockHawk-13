@@ -2,13 +2,25 @@
     <string name="app_name">Stock Hawk</string>
     <string name="details_name">Stock Details</string>
     <string name="action_example">Example action</string>
-    <string name="google_app_id">YOUR_PROJECT_NUMBER</string>
+    <string name="google_app_id" translatable="false">YOUR_PROJECT_NUMBER</string>
     <string name="action_settings">Settings</string>
     <string name="action_change_units">Change Units</string>
     <string name="symbol_search">Symbol Search</string>
     <string name="content_test">Search for a Stock Symbol</string>
-    <string name="input_hint">FB</string>
+    <string name="input_hint" translatable="false">FB</string>
     <string name="input_prefill"></string>
-    <string name="widget_title">Today\'s Market</string>
     <string name="network_toast">Uh-oh! This app requires an internet connection</string>
+    <string name="symbol_already_saved">This stock is already saved!</string>
+    <string name="history_1_day">1D</string>
+    <string name="history_5_days">5D</string>
+    <string name="history_1_month">1M</string>
+    <string name="history_6_months">6M</string>
+    <string name="history_1_year">1Y</string>
+    <string name="detail_label_open">Open</string>
+    <string name="detail_label_high">High</string>
+    <string name="detail_label_low">Low</string>
+    <string name="detail_label_market_cap">Mkt Cap</string>
+    <string name="detail_label_pe_ratio">PE Ratio</string>
+    <string name="detail_label_dividend_yield">Div Yield</string>
+    <string name="widget_title">Stock Quotes</string>
 </resources>

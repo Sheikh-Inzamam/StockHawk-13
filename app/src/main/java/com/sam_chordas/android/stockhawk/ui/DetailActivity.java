@@ -23,12 +23,12 @@ import com.db.chart.view.ChartView;
 import com.db.chart.view.LineChartView;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.data.Constants;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.service.HistoryData;
 import com.sam_chordas.android.stockhawk.service.HistoryItem;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
-import com.sam_chordas.android.stockhawk.service.StockTaskService;
 
 
 public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -69,20 +69,21 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int resultCode = intent.getExtras().getInt(StockTaskService.DETAIL_RESULT);
+            int resultCode = intent.getExtras().getInt(Constants.DETAIL_RESULT);
             if (resultCode != GcmNetworkManager.RESULT_SUCCESS) {
                 // todo report error
                 Log.e(TAG, "Details query failed...");
                 return;
             }
 
-            HistoryData stockHistory = intent.getExtras().getParcelable(StockTaskService.DETAIL_VALUES);
+            HistoryData stockHistory = intent.getExtras().getParcelable(Constants.DETAIL_VALUES);
             if (stockHistory.getItems().isEmpty()) {
                 // todo report error
                 Log.e(TAG, "Details query parsing failed...");
                 return;
             }
 
+            // todo put colors in resources
             Paint gridPaint = new Paint();
             gridPaint.setColor(Color.parseColor("#727272"));
             gridPaint.setStyle(Paint.Style.STROKE);
@@ -103,7 +104,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
             mChartView.setAxisBorderValues(minPrice, maxPrice)
                     .setLabelsColor(Color.WHITE)
-                    .setAxisLabelsSpacing(Tools.fromDpToPx(16))
+                    .setAxisLabelsSpacing(Tools.fromDpToPx(8))
                     .setGrid(ChartView.GridType.FULL, gridPaint)
                     .setXAxis(false)
                     .setYAxis(false);
@@ -122,8 +123,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mChartView = (LineChartView) findViewById(R.id.history_chart);
 
         Intent intent = getIntent();
-        String symbol = intent.getStringExtra("symbol");
-        Log.d(TAG, "symbol is: " + symbol);
+        String symbol = intent.getStringExtra(Constants.SYMBOL);
         mSymbol = symbol;
 
         getLoaderManager().initLoader(DETAILS_CURSOR_LOADER_ID, null, this);
@@ -184,19 +184,18 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         });
     }
 
-
     private void showHistoryChart(String symbol, int range) {
         mServiceIntent = new Intent(this, StockIntentService.class);
-        mServiceIntent.putExtra("tag", "details");
-        mServiceIntent.putExtra("symbol", symbol);
-        mServiceIntent.putExtra("history_range", range);
+        mServiceIntent.putExtra(Constants.TAG, Constants.DETAILS);
+        mServiceIntent.putExtra(Constants.SYMBOL, symbol);
+        mServiceIntent.putExtra(Constants.RANGE, range);
         startService(mServiceIntent);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(mDataReceiver, new IntentFilter(StockTaskService.DETAIL_INTENT));
+        registerReceiver(mDataReceiver, new IntentFilter(Constants.DETAIL_INTENT));
         getLoaderManager().restartLoader(DETAILS_CURSOR_LOADER_ID, null, this);
     }
 
@@ -266,12 +265,11 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 mLow.setText(c.getString(c.getColumnIndex(QuoteColumns.DAYSLOW)));
                 mMarketCap.setText(c.getString(c.getColumnIndex(QuoteColumns.MARKET_CAP)));
 
-                if (c.getInt(c.getColumnIndex("is_up")) == 1) {
+                if (c.getInt(c.getColumnIndex(QuoteColumns.ISUP)) == 1) {
                     mChange.setBackground(getApplicationContext().getResources().getDrawable(R.drawable.percent_change_pill_green));
                 } else {
                     mChange.setBackground(getApplicationContext().getResources().getDrawable(R.drawable.percent_change_pill_red));
                 }
-
 
                 val = c.getString(c.getColumnIndex(QuoteColumns.PE_RATIO));
                 if (val.equals("null")) {

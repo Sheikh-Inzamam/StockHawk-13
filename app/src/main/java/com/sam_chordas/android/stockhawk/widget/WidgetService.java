@@ -48,10 +48,10 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
     public RemoteViews getViewAt(int position) {
         RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.widget_list_item_quote);
         if (mCursor.moveToPosition(position)) {
-            rv.setTextViewText(R.id.stock_symbol, mCursor.getString(mCursor.getColumnIndex("symbol")));
-            rv.setTextViewText(R.id.bid_price, mCursor.getString(mCursor.getColumnIndex("bid_price")));
-            rv.setTextViewText(R.id.change, mCursor.getString(mCursor.getColumnIndex("percent_change")));
-            if (mCursor.getInt(mCursor.getColumnIndex("is_up")) == 1) {
+            rv.setTextViewText(R.id.stock_symbol, mCursor.getString(mCursor.getColumnIndex(QuoteColumns.SYMBOL)));
+            rv.setTextViewText(R.id.bid_price, mCursor.getString(mCursor.getColumnIndex(QuoteColumns.BIDPRICE)));
+            rv.setTextViewText(R.id.change, mCursor.getString(mCursor.getColumnIndex(QuoteColumns.PERCENT_CHANGE)));
+            if (mCursor.getInt(mCursor.getColumnIndex(QuoteColumns.ISUP)) == 1) {
                 rv.setInt(R.id.change, "setBackgroundResource", R.drawable.percent_change_pill_green);
             }
             else {

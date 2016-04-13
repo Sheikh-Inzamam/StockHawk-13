@@ -7,14 +7,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+/*
+    key - timestamp or datestamp that is defined as a label in json data
+    value - formatted label to show in chart
+    if key matches data label value is set, otherwise label is empty
+ */
 public class ChartLabel {
     private static final String TAG = ChartLabel.class.getSimpleName();
 
-    /*
-        key - timestamp or datestamp that is defined as a label in json data
-        value - formatted label to show in chart
-        if key matches data label is set, otherwise label is empty
-     */
     private LinkedHashMap<String, String> mMap;
 
     public ChartLabel() {
@@ -37,7 +37,6 @@ public class ChartLabel {
         String label = mMap.get(key);
         if (label == null)
             label = "";
-
         return label;
     }
 }

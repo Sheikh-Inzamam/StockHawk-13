@@ -28,7 +28,6 @@ public class WidgetProvider extends AppWidgetProvider {
     private static WidgetDataProviderObserver sDataObserver;
 
     public WidgetProvider() {
-        Log.d(TAG, "WidgetProvider()");
         // Start the worker thread
         sWorkerThread = new HandlerThread("WidgetProvider-worker");
         sWorkerThread.start();
@@ -41,7 +40,6 @@ public class WidgetProvider extends AppWidgetProvider {
         // content providers, the data is often updated via a background service, or in response to
         // user interaction in the main app.  To ensure that the widget always reflects the current
         // state of the data, we must listen for changes and update ourselves accordingly.
-        Log.d(TAG, "onEnabled");
         final ContentResolver r = context.getContentResolver();
         if (sDataObserver == null) {
             final AppWidgetManager mgr = AppWidgetManager.getInstance(context);
@@ -96,7 +94,6 @@ public class WidgetProvider extends AppWidgetProvider {
             final PendingIntent refreshPendingIntent = PendingIntent.getBroadcast(context, 0,
                     refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             layout.setOnClickPendingIntent(R.id.refresh_button, refreshPendingIntent);
-            Log.d(TAG, "onUpdate widgetId: " + widgetId);
             appWidgetManager.updateAppWidget(widgetId, layout);
         }
         super.onUpdate(context, appWidgetManager, appWidgetIds);
@@ -104,7 +101,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
 
     /**
-     * Our data observer just notifies an update for all weather widgets when it detects a change.
+     * Our data observer just notifies an update for all widgets when it detects a change.
      */
     // credit: https://android.googlesource.com/platform/development/+/master/samples/WeatherListWidget/src/com/example/android/weatherlistwidget/WeatherWidgetProvider.java
     class WidgetDataProviderObserver extends ContentObserver {

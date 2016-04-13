@@ -11,11 +11,9 @@ import java.util.LinkedHashMap;
 public class HistoryData implements Parcelable {
 
     private final static String TAG = HistoryData.class.getSimpleName();
-
     private float mMinPrice;
     private float mMaxPrice;
     private ArrayList<HistoryItem> mChartEntries;
-
 
     public HistoryData() {
         mChartEntries = new ArrayList<>();
@@ -50,7 +48,6 @@ public class HistoryData implements Parcelable {
     }
 
     public void addFormattedLabels(ChartLabel labelSet, boolean exactMatch) {
-
         for (LinkedHashMap.Entry<String, String> entry : labelSet.getEntrySet()) {
             String key = entry.getKey();
             String label = entry.getValue();
@@ -91,13 +88,12 @@ public class HistoryData implements Parcelable {
         return index;
     }
 
+    // find first matching timestamp in 1 hour range
     private boolean timeStampInRange(String keyString, String timeStampString) {
         long key = Long.parseLong(keyString);
         long timestamp = Long.parseLong(timeStampString);
         long max = timestamp + 3600;
-        // timestamp in milliseconds, labels separated by 3600ms, scaled up * 1000 to make 1 hour
         boolean in = inRange(key, timestamp, max);
-        //Log.d(TAG, "----> inrange: " + in + " key: " + keyString + " min: " + timeStampString + " max: " + String.valueOf(max));
         return in;
     }
 
