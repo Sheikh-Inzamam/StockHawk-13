@@ -2,8 +2,8 @@ package com.sam_chordas.android.stockhawk.service;
 
 import android.util.Log;
 
+import com.sam_chordas.android.stockhawk.data.Constants;
 import com.sam_chordas.android.stockhawk.rest.Utils;
-import com.sam_chordas.android.stockhawk.ui.DetailActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,9 +21,9 @@ public class ChartLabelFactory {
         String datePattern;
 
         try {
-            labels = jsonObject.getJSONArray("labels");
+            labels = jsonObject.getJSONArray(Constants.J_LABELS);
             switch (dateRange) {
-                case DetailActivity.HISTORY_1_DAY:
+                case Constants.HISTORY_1_DAY:
                 default:
                     for (int i = 0; i < labels.length(); i++) {
                         // only show labels for the even hours
@@ -35,18 +35,18 @@ public class ChartLabelFactory {
                      }
                     break;
 
-                case DetailActivity.HISTORY_5_DAY:
+                case Constants.HISTORY_5_DAY:
                     datePattern = "LLL d";
-                    JSONArray timeStampRange = jsonObject.getJSONArray("TimeStamp-Ranges");
+                    JSONArray timeStampRange = jsonObject.getJSONArray(Constants.J_TIMESTAMP_RANGES);
                     for (int i = 0; i < timeStampRange.length(); i++) {
-                        dateString = timeStampRange.getJSONObject(i).getString("date");
+                        dateString = timeStampRange.getJSONObject(i).getString(Constants.J_LCASE_DATE);
                         label = Utils.formatLabel(dateString, datePattern);
-                        timeStamp = timeStampRange.getJSONObject(i).getString("max");
+                        timeStamp = timeStampRange.getJSONObject(i).getString(Constants.J_MAX);
                         labelSet.add(timeStamp, label);
                     }
                     break;
 
-                case DetailActivity.HISTORY_1_MONTH:
+                case Constants.HISTORY_1_MONTH:
                     datePattern = "LLL d";
                     for (int i = 0; i < labels.length(); i++) {
                         dateString = labels.getString(i);
@@ -55,7 +55,7 @@ public class ChartLabelFactory {
                     }
                 break;
 
-                case DetailActivity.HISTORY_6_MONTH:
+                case Constants.HISTORY_6_MONTH:
                     datePattern = "LLL yy";
                     for (int i = 0; i < labels.length(); i++) {
                         dateString = labels.getString(i);
@@ -64,7 +64,7 @@ public class ChartLabelFactory {
                     }
                     break;
 
-                case DetailActivity.HISTORY_1_YEAR:
+                case Constants.HISTORY_1_YEAR:
                     datePattern = "LLL yy";
                     for (int i = 0; i < labels.length(); i++) {
                         // only show labels for four of the months

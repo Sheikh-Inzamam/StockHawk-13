@@ -34,14 +34,6 @@ import com.sam_chordas.android.stockhawk.service.StockIntentService;
 public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String TAG = DetailActivity.class.getSimpleName();
-
-    // todo encapsulate
-    public static final int HISTORY_1_DAY = 0;
-    public static final int HISTORY_5_DAY = 1;
-    public static final int HISTORY_1_MONTH = 2;
-    public static final int HISTORY_6_MONTH = 3;
-    public static final int HISTORY_1_YEAR = 4;
-
     private Intent mServiceIntent;
     private LineChartView mChartView;
     private Cursor mCursor;
@@ -85,14 +77,14 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
             // todo put colors in resources
             Paint gridPaint = new Paint();
-            gridPaint.setColor(Color.parseColor("#727272"));
+            gridPaint.setColor(getResources().getColor(R.color.chart_gridcolor));
             gridPaint.setStyle(Paint.Style.STROKE);
             gridPaint.setAntiAlias(true);
             gridPaint.setStrokeWidth(Tools.fromDpToPx(1));
 
             LineSet data = new LineSet();
-            data.setColor(Color.parseColor("#64B4BF"))
-                    .setGradientFill(new int[]{Color.parseColor("#364d5a"), Color.parseColor("#3f7178")}, null)
+            data.setColor(getResources().getColor(R.color.chart_linecolor))
+                    .setGradientFill(new int[]{getResources().getColor(R.color.chart_gradient_dark), getResources().getColor(R.color.chart_gradient_light)}, null)
                     .setThickness(Tools.fromDpToPx(1))
                     .beginAt(0);
 
@@ -146,7 +138,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mHistory1Year = (RadioButton) findViewById(R.id.history_1y);
 
         // show default history chart - 1 day
-        showHistoryChart(symbol, DetailActivity.HISTORY_1_DAY);
+        showHistoryChart(symbol, Constants.HISTORY_1_DAY);
         mHistory1Day.setChecked(true);
         setupHistoryButtons();
     }
@@ -155,31 +147,31 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mHistory1Day.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showHistoryChart(mSymbol, DetailActivity.HISTORY_1_DAY);
+                showHistoryChart(mSymbol, Constants.HISTORY_1_DAY);
             }
         });
         mHistory5Day.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showHistoryChart(mSymbol, DetailActivity.HISTORY_5_DAY);
+                showHistoryChart(mSymbol, Constants.HISTORY_5_DAY);
             }
         });
         mHistory1Month.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showHistoryChart(mSymbol, DetailActivity.HISTORY_1_MONTH);
+                showHistoryChart(mSymbol, Constants.HISTORY_1_MONTH);
             }
         });
         mHistory6Month.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showHistoryChart(mSymbol, DetailActivity.HISTORY_6_MONTH);
+                showHistoryChart(mSymbol, Constants.HISTORY_6_MONTH);
             }
         });
         mHistory1Year.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showHistoryChart(mSymbol, DetailActivity.HISTORY_1_YEAR);
+                showHistoryChart(mSymbol, Constants.HISTORY_1_YEAR);
             }
         });
     }
@@ -272,13 +264,13 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 }
 
                 val = c.getString(c.getColumnIndex(QuoteColumns.PE_RATIO));
-                if (val.equals("null")) {
+                if (val.equals(Constants.NULLSTRING)) {
                     val = "-";
                 }
                 mPriceEarnings.setText(val);
 
                 val = c.getString(c.getColumnIndex(QuoteColumns.DIV_YIELD));
-                if (val.equals("null")) {
+                if (val.equals(Constants.NULLSTRING)) {
                     val = "-";
                 }
                 mDividendYield.setText(val);

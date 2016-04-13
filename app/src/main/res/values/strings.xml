@@ -23,4 +23,5 @@
     <string name="detail_label_pe_ratio">PE Ratio</string>
     <string name="detail_label_dividend_yield">Div Yield</string>
     <string name="widget_title">Stock Quotes</string>
+    <string name="symbol_not_found">Cannot find stock symbol: %s</string>
 </resources>

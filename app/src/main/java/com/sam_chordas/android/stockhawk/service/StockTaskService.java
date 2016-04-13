@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
+import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.Constants;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
@@ -175,13 +176,15 @@ public class StockTaskService extends GcmTaskService {
                     mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY, Utils.quoteJsonToContentVals(getResponse));
                 } catch (RemoteException | OperationApplicationException | InvalidStockSymbolException e) {
                     Log.e(TAG, "Error applying batch insert", e);
-                    // if invalid stock symbol show Toast to user
+                    // if invalid stock symbol show Toast
                     if (e instanceof InvalidStockSymbolException) {
                         Handler handler = new Handler(Looper.getMainLooper());
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                                String msg = mContext.getString(R.string.symbol_not_found);
+                                msg = String.format(msg, ((InvalidStockSymbolException) e).getMessage());
+                                Toast.makeText(mContext.getApplicationContext(), msg, Toast.LENGTH_LONG).show();
                             }
                         });
                     }

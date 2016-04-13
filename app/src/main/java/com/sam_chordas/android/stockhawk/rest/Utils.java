@@ -3,6 +3,7 @@ package com.sam_chordas.android.stockhawk.rest;
 import android.content.ContentProviderOperation;
 import android.util.Log;
 
+import com.sam_chordas.android.stockhawk.data.Constants;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.service.ChartLabel;
@@ -10,7 +11,6 @@ import com.sam_chordas.android.stockhawk.service.ChartLabelFactory;
 import com.sam_chordas.android.stockhawk.service.HistoryData;
 import com.sam_chordas.android.stockhawk.service.HistoryItem;
 import com.sam_chordas.android.stockhawk.service.InvalidStockSymbolException;
-import com.sam_chordas.android.stockhawk.ui.DetailActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,20 +39,18 @@ public class Utils {
         try {
             jsonObject = new JSONObject(JSON);
             if (jsonObject != null && jsonObject.length() != 0) {
-                jsonObject = jsonObject.getJSONObject("query");
-                int count = Integer.parseInt(jsonObject.getString("count"));
+                jsonObject = jsonObject.getJSONObject(Constants.J_QUERY);
+                int count = Integer.parseInt(jsonObject.getString(Constants.J_COUNT));
                 if (count == 1) {
-                    jsonObject = jsonObject.getJSONObject("results")
-                            .getJSONObject("quote");
-
+                    jsonObject = jsonObject.getJSONObject(Constants.J_RESULTS)
+                            .getJSONObject(Constants.J_QUOTE);
                     // validate results - assume that if 'Bid' is 'null' symbol is invalid
-                    if (jsonObject.getString("Bid") == "null") {
-                        String msg = "Cannot find stock symbol: " + jsonObject.getString("symbol");
-                        throw new InvalidStockSymbolException(msg);
+                    if (jsonObject.getString(Constants.J_BID) == "null") {
+                        throw new InvalidStockSymbolException(jsonObject.getString(Constants.J_SYMBOL));
                     }
                     batchOperations.add(buildBatchOperation(jsonObject));
                 } else {
-                    resultsArray = jsonObject.getJSONObject("results").getJSONArray("quote");
+                    resultsArray = jsonObject.getJSONObject(Constants.J_RESULTS).getJSONArray(Constants.J_QUOTE);
 
                     if (resultsArray != null && resultsArray.length() != 0) {
                         for (int i = 0; i < resultsArray.length(); i++) {
@@ -79,16 +77,16 @@ public class Utils {
             if (jsonObject != null && jsonObject.length() != 0) {
                 ChartLabel chartLabels = ChartLabelFactory.create(jsonObject, dateRange);
                 chartLabels.dump();
-                resultsArray = jsonObject.getJSONArray("series");
-                closingValues = jsonObject.getJSONObject("ranges").getJSONObject("close");
-                h.setMinPrice(Float.valueOf(closingValues.getString("min")));
-                h.setMaxPrice(Float.valueOf(closingValues.getString("max")));
+                resultsArray = jsonObject.getJSONArray(Constants.J_SERIES);
+                closingValues = jsonObject.getJSONObject(Constants.J_RANGES).getJSONObject(Constants.J_CLOSE);
+                h.setMinPrice(Float.valueOf(closingValues.getString(Constants.J_MIN)));
+                h.setMaxPrice(Float.valueOf(closingValues.getString(Constants.J_MAX)));
 
                 if (resultsArray != null && resultsArray.length() != 0) {
                     for (int i = 0; i < resultsArray.length(); i++) {
                         jsonObject = resultsArray.getJSONObject(i);
                         timeStamp = getTimeStamp(jsonObject);
-                        h.addEntry(new HistoryItem(timeStamp, "", formatPrice(jsonObject.getString("close"))));
+                        h.addEntry(new HistoryItem(timeStamp, "", formatPrice(jsonObject.getString(Constants.J_CLOSE))));
                     }
                     h.addFormattedLabels(chartLabels, findMatchingDateInRange(dateRange));
                 }
@@ -102,15 +100,15 @@ public class Utils {
 
     // single day queries do not necessarily have matching labels so need to find closest matching timestamp in a range
     private static boolean findMatchingDateInRange(int dateRange) {
-        return (dateRange == DetailActivity.HISTORY_1_DAY
-                || dateRange == DetailActivity.HISTORY_5_DAY);
+        return (dateRange == Constants.HISTORY_1_DAY
+                || dateRange == Constants.HISTORY_5_DAY);
     }
 
     // use timestamp or date as key, depending on which is available
     private static String getTimeStamp(JSONObject jsonObject) {
-        String timeStamp = jsonObject.optString("Timestamp");
+        String timeStamp = jsonObject.optString(Constants.J_TIMESTAMP);
         if (timeStamp.isEmpty()) {
-            timeStamp = jsonObject.optString("Date", "fail");
+            timeStamp = jsonObject.optString(Constants.J_DATE, "fail");
         }
         return timeStamp;
     }
@@ -118,20 +116,20 @@ public class Utils {
     public static String getRangeFlag(int range) {
         String rangeFlag;
         switch (range) {
-            case DetailActivity.HISTORY_1_DAY:
+            case Constants.HISTORY_1_DAY:
             default:
                 rangeFlag = "1d";
                 break;
-            case DetailActivity.HISTORY_5_DAY:
+            case Constants.HISTORY_5_DAY:
                 rangeFlag = "5d";
                 break;
-            case DetailActivity.HISTORY_1_MONTH:
+            case Constants.HISTORY_1_MONTH:
                 rangeFlag = "1m";
                 break;
-            case DetailActivity.HISTORY_6_MONTH:
+            case Constants.HISTORY_6_MONTH:
                 rangeFlag = "6m";
                 break;
-            case DetailActivity.HISTORY_1_YEAR:
+            case Constants.HISTORY_1_YEAR:
                 rangeFlag = "1y";
                 break;
         }
@@ -220,11 +218,11 @@ public class Utils {
         ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
                 QuoteProvider.Quotes.CONTENT_URI);
         try {
-            String change = jsonObject.getString("Change");
-            builder.withValue(QuoteColumns.SYMBOL, jsonObject.getString("symbol"));
-            builder.withValue(QuoteColumns.BIDPRICE, truncateBidPrice(jsonObject.getString("Bid")));
+            String change = jsonObject.getString(Constants.J_CHANGE);
+            builder.withValue(QuoteColumns.SYMBOL, jsonObject.getString(Constants.J_SYMBOL));
+            builder.withValue(QuoteColumns.BIDPRICE, truncateBidPrice(jsonObject.getString(Constants.J_BID)));
             builder.withValue(QuoteColumns.PERCENT_CHANGE, truncateChange(
-                    jsonObject.getString("ChangeinPercent"), true));
+                    jsonObject.getString(Constants.J_CHANGE_PERCENT), true));
             builder.withValue(QuoteColumns.CHANGE, truncateChange(change, false));
             builder.withValue(QuoteColumns.ISCURRENT, 1);
             if (change.charAt(0) == '-') {
@@ -234,13 +232,13 @@ public class Utils {
             }
 
             // new columns for details view
-            builder.withValue(QuoteColumns.NAME, jsonObject.getString("Name"));
-            builder.withValue(QuoteColumns.OPEN_PRICE, jsonObject.getString("Open"));
-            builder.withValue(QuoteColumns.DAYSHIGH, jsonObject.getString("DaysHigh"));
-            builder.withValue(QuoteColumns.DAYSLOW, jsonObject.getString("DaysLow"));
-            builder.withValue(QuoteColumns.DIV_YIELD, jsonObject.getString("DividendYield"));
-            builder.withValue(QuoteColumns.PE_RATIO, jsonObject.getString("PERatio"));
-            builder.withValue(QuoteColumns.MARKET_CAP, jsonObject.getString("MarketCapitalization"));
+            builder.withValue(QuoteColumns.NAME, jsonObject.getString(Constants.J_NAME));
+            builder.withValue(QuoteColumns.OPEN_PRICE, jsonObject.getString(Constants.J_OPEN));
+            builder.withValue(QuoteColumns.DAYSHIGH, jsonObject.getString(Constants.J_DAYHIGH));
+            builder.withValue(QuoteColumns.DAYSLOW, jsonObject.getString(Constants.J_DAYLOW));
+            builder.withValue(QuoteColumns.DIV_YIELD, jsonObject.getString(Constants.J_DIVYIELD));
+            builder.withValue(QuoteColumns.PE_RATIO, jsonObject.getString(Constants.J_PERATIO));
+            builder.withValue(QuoteColumns.MARKET_CAP, jsonObject.getString(Constants.J_MARKETCAP));
 
         } catch (JSONException e) {
             e.printStackTrace();
