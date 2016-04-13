@@ -249,35 +249,45 @@
                 android:id="@+id/history_1d"
                 android:text="@string/history_1_day"
                 style="@style/HistoryRadioButtonStyle"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:focusable="true"
+                android:contentDescription="@string/history_1_day_description" />
             <RadioButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/history_5d"
                 style="@style/HistoryRadioButtonStyle"
                 android:text="@string/history_5_days"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:focusable="true"
+                android:contentDescription="@string/history_5_days_description" />
             <RadioButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/history_1m"
                 style="@style/HistoryRadioButtonStyle"
                 android:text="@string/history_1_month"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:focusable="true"
+                android:contentDescription="@string/history_1_month_description" />
             <RadioButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/history_6m"
                 style="@style/HistoryRadioButtonStyle"
                 android:text="@string/history_6_months"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:focusable="true"
+                android:contentDescription="@string/history_6_months_description" />
             <RadioButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/history_1y"
                 style="@style/HistoryRadioButtonStyle"
                 android:text="@string/history_1_year"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:focusable="true"
+                android:contentDescription="@string/history_1_year_description" />
         </RadioGroup>
 
         <com.db.chart.view.LineChartView

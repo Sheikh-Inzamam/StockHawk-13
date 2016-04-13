@@ -16,6 +16,11 @@
     <string name="history_1_month">1M</string>
     <string name="history_6_months">6M</string>
     <string name="history_1_year">1Y</string>
+    <string name="history_1_day_description">Show one day history chart</string>
+    <string name="history_5_days_description">Show five day history chart</string>
+    <string name="history_1_month_description">Show one month history chart</string>
+    <string name="history_6_months_description">Show six month history chart</string>
+    <string name="history_1_year_description">Show one year history chart</string>
     <string name="detail_label_open">Open</string>
     <string name="detail_label_high">High</string>
     <string name="detail_label_low">Low</string>
@@ -24,4 +29,8 @@
     <string name="detail_label_dividend_yield">Div Yield</string>
     <string name="widget_title">Stock Quotes</string>
     <string name="symbol_not_found">Cannot find stock symbol: %s</string>
+    <string name="listview_description">StockHawk list of stock quotes</string>
+    <string name="add_symbol_button_description">Add stock symbol to list of quotes</string>
+    <string name="widget_refresh_description">Refresh stock quote list</string>
+    <string name="widget_listview_description">StockHawk widget list of stock quotes</string>
 </resources>

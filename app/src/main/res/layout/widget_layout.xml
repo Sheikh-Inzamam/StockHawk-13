@@ -34,7 +34,10 @@
                 android:id="@+id/refresh_button"
                 android:layout_marginRight="12dp"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_cached_white_24dp" />
+                android:src="@drawable/ic_cached_white_24dp"
+                android:focusable="true"
+                android:contentDescription="@string/widget_refresh_description"
+                />
         </LinearLayout>
     </LinearLayout>
 
@@ -51,6 +54,8 @@
             tools:listitem="@layout/widget_list_item_quote"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:background="@color/material_grey_600"/>
+            android:background="@color/material_grey_600"
+            android:contentDescription="@string/widget_listview_description"
+            />
     </FrameLayout>
   </LinearLayout>
