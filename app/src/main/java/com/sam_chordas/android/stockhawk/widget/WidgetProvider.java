@@ -12,9 +12,11 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.rest.Utils;
 
 
 public class WidgetProvider extends AppWidgetProvider {
@@ -61,18 +63,23 @@ public class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(REFRESH_ACTION)) {
-            final Context ctx = context;
-            sWorkerQueue.removeMessages(0);
-            sWorkerQueue.post(new Runnable() {
-                @Override
-                public void run() {
-                    final AppWidgetManager mgr = AppWidgetManager.getInstance(ctx);
-                    final ComponentName cn = new ComponentName(ctx, WidgetProvider.class);
-                    int[] appWidgetIds = mgr.getAppWidgetIds(cn);
-                    mgr.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview);
-                }
-            });
 
+            if (Utils.isNetworkConnected(context)) {
+                final Context ctx = context;
+                sWorkerQueue.removeMessages(0);
+                sWorkerQueue.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        final AppWidgetManager mgr = AppWidgetManager.getInstance(ctx);
+                        final ComponentName cn = new ComponentName(ctx, WidgetProvider.class);
+                        int[] appWidgetIds = mgr.getAppWidgetIds(cn);
+                        mgr.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview);
+                    }
+                });
+            }
+            else {
+                Toast.makeText(context, context.getString(R.string.network_toast), Toast.LENGTH_SHORT).show();
+            }
         }
         super.onReceive(context, intent);
     }

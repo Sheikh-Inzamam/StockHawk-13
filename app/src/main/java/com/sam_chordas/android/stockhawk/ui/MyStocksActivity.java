@@ -6,8 +6,6 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -53,7 +51,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     private QuoteCursorAdapter mCursorAdapter;
     private Context mContext;
     private Cursor mCursor;
-    private boolean mIsConnected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,20 +58,13 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         mContext = this;
         setContentView(R.layout.activity_my_stocks);
 
-        ConnectivityManager cm =
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        mIsConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-
-
         // The intent service is for executing immediate pulls from the Yahoo API
         // GCMTaskService can only schedule tasks, they cannot execute immediately
         mServiceIntent = new Intent(this, StockIntentService.class);
         if (savedInstanceState == null) {
             // Run the initialize task service so that some stocks appear upon an empty database
             mServiceIntent.putExtra(Constants.TAG, Constants.INIT);
-            if (mIsConnected) {
+            if (Utils.isNetworkConnected(mContext)) {
                 startService(mServiceIntent);
             } else {
                 networkToast(getString(R.string.network_toast));
@@ -91,7 +81,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                 new RecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View v, int position) {
-                        if (mIsConnected) {
+                        if (Utils.isNetworkConnected(mContext)) {
                             Intent intent = new Intent(mContext, DetailActivity.class);
                             intent.putExtra(Constants.SYMBOL, mCursorAdapter.getStockSymbol(position));
                             mContext.startActivity(intent);
@@ -109,7 +99,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mIsConnected) {
+                if (Utils.isNetworkConnected(mContext)) {
                     new MaterialDialog.Builder(mContext).title(R.string.symbol_search)
                             .content(R.string.content_test)
                             .inputType(InputType.TYPE_CLASS_TEXT)
@@ -149,7 +139,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         mItemTouchHelper.attachToRecyclerView(recyclerView);
 
         mTitle = getTitle();
-        if (mIsConnected) {
+        if (Utils.isNetworkConnected(mContext)) {
             long period = 3600L;
             long flex = 10L;
             // create a periodic task to pull stocks once every hour after the app has been opened. This
@@ -234,5 +224,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     public void onLoaderReset(Loader<Cursor> loader) {
         mCursorAdapter.swapCursor(null);
     }
+
 
 }

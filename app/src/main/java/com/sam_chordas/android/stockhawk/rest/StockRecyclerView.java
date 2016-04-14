@@ -13,6 +13,7 @@ import android.view.View;
  */
 
 public class StockRecyclerView extends RecyclerView {
+    private static final String TAG = StockRecyclerView.class.getSimpleName();
     private View mEmptyView;
 
     private AdapterDataObserver mDataObserver = new AdapterDataObserver() {
@@ -43,6 +44,8 @@ public class StockRecyclerView extends RecyclerView {
     public void setEmptyView(View emptyView) {
         mEmptyView = emptyView;
     }
+
+
 
     @Override
     public void setAdapter(RecyclerView.Adapter adapter) {
