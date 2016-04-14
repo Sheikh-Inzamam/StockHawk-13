@@ -194,6 +194,15 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
             return true;
         }
 
+        if (id == R.id.action_refresh_quotes) {
+            mServiceIntent.putExtra(Constants.TAG, Constants.REFRESH);
+            if (Utils.isNetworkConnected(mContext)) {
+                startService(mServiceIntent);
+            } else {
+                networkToast(getString(R.string.network_toast));
+            }
+        }
+
         if (id == R.id.action_change_units) {
             // this is for changing stock changes from percent value to dollar value
             Utils.showPercent = !Utils.showPercent;

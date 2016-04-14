@@ -9,4 +9,9 @@
       android:orderInCategory="99"
       app:showAsAction="always"/>
 
+    <item android:id="@+id/action_refresh_quotes"
+        android:title="@string/action_refresh_quotes"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+
 </menu>

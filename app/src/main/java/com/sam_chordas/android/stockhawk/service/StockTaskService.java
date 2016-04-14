@@ -108,7 +108,10 @@ public class StockTaskService extends GcmTaskService {
             e.printStackTrace();
         }
 
-        if (params.getTag().equals(Constants.INIT) || params.getTag().equals(Constants.PERIODIC)) {
+        if (params.getTag().equals(Constants.INIT) ||
+                params.getTag().equals(Constants.PERIODIC) ||
+                params.getTag().equals(Constants.REFRESH)) {
+
             isUpdate = true;
             initQueryCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                     new String[]{"Distinct " + QuoteColumns.SYMBOL}, null,
@@ -124,8 +127,9 @@ public class StockTaskService extends GcmTaskService {
                     e.printStackTrace();
                 }
 
-            // periodic
+            // periodic or refresh
             } else if (initQueryCursor != null) {
+                Log.d(TAG, "------------------- handleQuoteQuery - refresh or periodic");
                 DatabaseUtils.dumpCursor(initQueryCursor);
                 initQueryCursor.moveToFirst();
                 for (int i = 0; i < initQueryCursor.getCount(); i++) {

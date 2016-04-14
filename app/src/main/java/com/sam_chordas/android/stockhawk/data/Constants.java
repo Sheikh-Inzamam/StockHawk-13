@@ -8,6 +8,7 @@ public class Constants {
     public static final String INIT = "init";
     public static final String ADD = "add";
     public static final String PERIODIC = "periodic";
+    public static final String REFRESH = "periodic";
     public static final String NULLSTRING = "null";
     public static final String DETAIL_INTENT = "detail_intent";
     public static final String DETAIL_VALUES = "detail_values";
