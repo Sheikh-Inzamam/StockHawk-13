@@ -45,6 +45,40 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ListView
+                android:id="@+id/widget_listview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@null"
+                android:dividerHeight="0dp"
+                tools:listitem="@layout/widget_list_item_quote"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:background="@color/material_grey_600"
+                android:contentDescription="@string/widget_listview_description"
+                />
+            <TextView
+                android:id="@+id/empty_view"
+                android:text="@string/empty_list"
+                style="?android:attr/textAppearanceMedium"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:contentDescription="@string/empty_listview_description"
+                android:gravity="center"
+                android:visibility="gone"/>
+        </RelativeLayout>
+    </FrameLayout>
+  </LinearLayout>
+
+<!--
+        <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
         <ListView
             android:id="@+id/widget_listview"
             android:layout_width="match_parent"
@@ -57,5 +91,14 @@
             android:background="@color/material_grey_600"
             android:contentDescription="@string/widget_listview_description"
             />
+        <TextView
+            android:id="@+id/empty_view"
+            android:text="@string/empty_list"
+            style="?android:attr/textAppearanceMedium"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:contentDescription="@string/empty_listview_description"
+            android:gravity="center" />
     </FrameLayout>
-  </LinearLayout>
+-->

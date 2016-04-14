@@ -86,6 +86,7 @@ public class WidgetProvider extends AppWidgetProvider {
             intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
             RemoteViews layout = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
             layout.setRemoteAdapter(R.id.widget_listview, intent);
+            layout.setEmptyView(R.id.widget_listview, R.id.empty_view);
 
             // Set up refresh button intent
             final Intent refreshIntent = new Intent(context, WidgetProvider.class);
