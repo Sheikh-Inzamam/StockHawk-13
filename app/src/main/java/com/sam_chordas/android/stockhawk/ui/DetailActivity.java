@@ -225,30 +225,11 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursor = data;
         if (mCursor != null) {
-            Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
-                    new String[]{
-                            QuoteColumns.SYMBOL,
-                            QuoteColumns.BIDPRICE,
-                            QuoteColumns.PERCENT_CHANGE,
-                            QuoteColumns.CHANGE,
-                            QuoteColumns.ISUP,
-                            QuoteColumns.NAME,
-                            QuoteColumns.OPEN_PRICE,
-                            QuoteColumns.DAYSLOW,
-                            QuoteColumns.DAYSHIGH,
-                            QuoteColumns.PE_RATIO,
-                            QuoteColumns.DIV_YIELD,
-                            QuoteColumns.MARKET_CAP
-                    },
-                    QuoteColumns.SYMBOL + "= ?",
-                    new String[]{mSymbol}, null);
-
+            Cursor c = mCursor;
             if (c.getCount() != 0) {
                 c.moveToFirst();
-
-                String val;
                 mName.setText(c.getString(c.getColumnIndex(QuoteColumns.NAME)));
-                val = c.getString(c.getColumnIndex(QuoteColumns.SYMBOL));
+                String val = c.getString(c.getColumnIndex(QuoteColumns.SYMBOL));
                 mSymbolView.setText(val.toUpperCase());
                 mPrice.setText(c.getString(c.getColumnIndex(QuoteColumns.BIDPRICE)));
                 mChange.setText(c.getString(c.getColumnIndex(QuoteColumns.PERCENT_CHANGE)));
@@ -274,7 +255,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                     val = "-";
                 }
                 mDividendYield.setText(val);
-
                 c.close();
             }
         }
