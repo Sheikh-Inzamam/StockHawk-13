@@ -225,7 +225,27 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursor = data;
         if (mCursor != null) {
-            Cursor c = mCursor;
+            Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
+                    new String[]{
+                            QuoteColumns._ID,
+                            QuoteColumns.ISCURRENT,
+                            QuoteColumns.SYMBOL,
+                            QuoteColumns.BIDPRICE,
+                            QuoteColumns.PERCENT_CHANGE,
+                            QuoteColumns.CHANGE,
+                            QuoteColumns.ISUP,
+                            QuoteColumns.NAME,
+                            QuoteColumns.OPEN_PRICE,
+                            QuoteColumns.DAYSLOW,
+                            QuoteColumns.DAYSHIGH,
+                            QuoteColumns.PE_RATIO,
+                            QuoteColumns.DIV_YIELD,
+                            QuoteColumns.MARKET_CAP
+                    },
+                    QuoteColumns.SYMBOL + " = ? AND " + QuoteColumns.ISCURRENT + " = ?",
+                    new String[]{mSymbol, "1"},
+                    null);
+
             if (c.getCount() != 0) {
                 c.moveToFirst();
                 mName.setText(c.getString(c.getColumnIndex(QuoteColumns.NAME)));
@@ -255,6 +275,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                     val = "-";
                 }
                 mDividendYield.setText(val);
+
                 c.close();
             }
         }
