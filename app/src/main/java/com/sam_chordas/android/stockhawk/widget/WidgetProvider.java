@@ -54,7 +54,9 @@ public class WidgetProvider extends AppWidgetProvider {
     public void onDisabled(Context context) {
         super.onDisabled(context);
         final ContentResolver r = context.getContentResolver();
-        r.unregisterContentObserver(sDataObserver);
+        if (sDataObserver != null) {
+            r.unregisterContentObserver(sDataObserver);
+        }
         if (sWorkerThread != null) {
             sWorkerThread.quit();
         }
