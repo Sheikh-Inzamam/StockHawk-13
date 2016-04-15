@@ -15,7 +15,7 @@ import java.util.Set;
 public class ChartLabel {
     private static final String TAG = ChartLabel.class.getSimpleName();
 
-    private LinkedHashMap<String, String> mMap;
+    private final LinkedHashMap<String, String> mMap;
 
     public ChartLabel() {
          mMap = new LinkedHashMap<>();
@@ -33,12 +33,6 @@ public class ChartLabel {
         return mMap.entrySet();
     }
 
-    public String getMatchingLabel(String key) {
-        String label = mMap.get(key);
-        if (label == null)
-            label = "";
-        return label;
-    }
 }
 
 

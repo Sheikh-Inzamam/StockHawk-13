@@ -7,7 +7,7 @@
       android:title="@string/action_change_units"
       android:icon="@drawable/ic_attach_money_white_24dp"
       android:orderInCategory="99"
-      app:showAsAction="always"/>
+      app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/action_refresh_quotes"
         android:title="@string/action_refresh_quotes"

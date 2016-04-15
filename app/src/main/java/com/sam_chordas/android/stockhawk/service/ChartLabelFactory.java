@@ -85,6 +85,3 @@ public class ChartLabelFactory {
         return labelSet;
     }
 }
-
-
-;

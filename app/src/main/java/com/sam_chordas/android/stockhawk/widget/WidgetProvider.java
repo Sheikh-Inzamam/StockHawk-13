@@ -22,7 +22,7 @@ import com.sam_chordas.android.stockhawk.rest.Utils;
 public class WidgetProvider extends AppWidgetProvider {
 
     private static final String TAG = WidgetProvider.class.getSimpleName();
-    public static String REFRESH_ACTION = "refresh";
+    private static final String REFRESH_ACTION = "refresh";
 
     private static HandlerThread sWorkerThread;
     private static Handler sWorkerQueue;
@@ -112,8 +112,8 @@ public class WidgetProvider extends AppWidgetProvider {
      */
     // credit: https://android.googlesource.com/platform/development/+/master/samples/WeatherListWidget/src/com/example/android/weatherlistwidget/WeatherWidgetProvider.java
     class WidgetDataProviderObserver extends ContentObserver {
-        private AppWidgetManager mAppWidgetManager;
-        private ComponentName mComponentName;
+        private final AppWidgetManager mAppWidgetManager;
+        private final ComponentName mComponentName;
 
         WidgetDataProviderObserver(AppWidgetManager mgr, ComponentName cn, Handler h) {
             super(h);

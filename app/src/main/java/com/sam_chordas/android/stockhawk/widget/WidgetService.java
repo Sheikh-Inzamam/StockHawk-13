@@ -1,6 +1,5 @@
 package com.sam_chordas.android.stockhawk.widget;
 
-import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -22,13 +21,13 @@ public class WidgetService extends RemoteViewsService  {
 class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
     private static final String TAG = WidgetRemoteViewsFactory.class.getSimpleName();
-    private Context mContext;
-    private int mWidgetId;
+    private final Context mContext;
+    //private int mWidgetId;
     private Cursor mCursor;
 
     public WidgetRemoteViewsFactory(Context context, Intent intent) {
         mContext = context;
-        mWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+      //  mWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
     }
 
     @Override

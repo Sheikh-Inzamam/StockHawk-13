@@ -12,11 +12,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.InputType;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.gcm.GcmNetworkManager;
@@ -46,11 +44,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
      */
     private CharSequence mTitle;
     private Intent mServiceIntent;
-    private ItemTouchHelper mItemTouchHelper;
+//    private ItemTouchHelper mItemTouchHelper;
     private static final int CURSOR_LOADER_ID = 0;
     private QuoteCursorAdapter mCursorAdapter;
     private Context mContext;
-    private Cursor mCursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +64,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
             if (Utils.isNetworkConnected(mContext)) {
                 startService(mServiceIntent);
             } else {
-                networkToast(getString(R.string.network_toast));
+                Utils.showToast(mContext, getString(R.string.network_toast));
             }
         }
         StockRecyclerView recyclerView = (StockRecyclerView) findViewById(R.id.recycler_view);
@@ -87,7 +84,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                             mContext.startActivity(intent);
                         }
                         else {
-                            networkToast(getString(R.string.network_toast_nodetails));
+                            Utils.showToast(mContext, getString(R.string.network_toast_nodetails));
                         }
                     }
                 }));
@@ -112,12 +109,8 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                                             new String[]{QuoteColumns.SYMBOL}, QuoteColumns.SYMBOL + "= ?",
                                             new String[]{input.toString()}, null);
                                     if (c.getCount() != 0) {
-                                        Toast toast =
-                                                Toast.makeText(MyStocksActivity.this, getString(R.string.symbol_already_saved),
-                                                        Toast.LENGTH_LONG);
-                                        toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
-                                        toast.show();
-                                        return;
+                                        Utils.showToast(mContext, getString(R.string.symbol_already_saved));
+                                        c.close();
                                     } else {
                                         // Add the stock to DB
                                         mServiceIntent.putExtra(Constants.TAG, Constants.ADD);
@@ -128,15 +121,15 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                             })
                             .show();
                 } else {
-                    networkToast(getString(R.string.network_toast_noadd));
+                    Utils.showToast(mContext, getString(R.string.network_toast_noadd));
                 }
 
             }
         });
 
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(mCursorAdapter);
-        mItemTouchHelper = new ItemTouchHelper(callback);
-        mItemTouchHelper.attachToRecyclerView(recyclerView);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         mTitle = getTitle();
         if (Utils.isNetworkConnected(mContext)) {
@@ -164,11 +157,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
     }
 
-    public void networkToast(String msg) {
-        Toast.makeText(mContext, msg, Toast.LENGTH_LONG).show();
-    }
-
-    public void restoreActionBar() {
+    private void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
@@ -199,8 +188,9 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
             if (Utils.isNetworkConnected(mContext)) {
                 startService(mServiceIntent);
             } else {
-                networkToast(getString(R.string.network_toast));
+                Utils.showToast(mContext, getString(R.string.network_toast));
             }
+            return true;
         }
 
         if (id == R.id.action_change_units) {
@@ -226,7 +216,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
-        mCursor = data;
     }
 
     @Override

@@ -28,7 +28,7 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
 
   private static Context mContext;
   private static Typeface robotoLight;
-  private boolean isPercent;
+  //private boolean isPercent;
 
   public QuoteCursorAdapter(Context context, Cursor cursor) {
     super(context, cursor);
@@ -40,8 +40,7 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     robotoLight = Typeface.createFromAsset(mContext.getAssets(), "fonts/Roboto-Light.ttf");
     View itemView = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.list_item_quote, parent, false);
-    ViewHolder vh = new ViewHolder(itemView);
-    return vh;
+    return new ViewHolder(itemView);
   }
 
   @Override
@@ -81,11 +80,13 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     mContext.getContentResolver().delete(QuoteProvider.Quotes.withSymbol(symbol), null, null);
     notifyItemRemoved(position);
   }
+/*
 
   @Override
   public int getItemCount() {
     return super.getItemCount();
   }
+*/
 
   public String getStockSymbol(int position) {
     Cursor c = getCursor();

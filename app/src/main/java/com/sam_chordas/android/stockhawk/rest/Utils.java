@@ -5,6 +5,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import com.sam_chordas.android.stockhawk.data.Constants;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
@@ -31,24 +33,25 @@ import java.util.TimeZone;
  */
 public class Utils {
 
-    private static String TAG = Utils.class.getSimpleName();
+    private static final String TAG = Utils.class.getSimpleName();
 
     public static boolean showPercent = true;
 
-    public static ArrayList quoteJsonToContentVals(String JSON) {
+    public static ArrayList<ContentProviderOperation> quoteJsonToContentVals(String JSON) {
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
         JSONObject jsonObject;
         JSONArray resultsArray;
         try {
             jsonObject = new JSONObject(JSON);
-            if (jsonObject != null && jsonObject.length() != 0) {
+         //   if (jsonObject != null && jsonObject.length() != 0) {
+            if (jsonObject.length() != 0) {
                 jsonObject = jsonObject.getJSONObject(Constants.J_QUERY);
                 int count = Integer.parseInt(jsonObject.getString(Constants.J_COUNT));
                 if (count == 1) {
                     jsonObject = jsonObject.getJSONObject(Constants.J_RESULTS)
                             .getJSONObject(Constants.J_QUOTE);
                     // validate results - assume that if 'Bid' is 'null' symbol is invalid
-                    if (jsonObject.getString(Constants.J_BID) == Constants.NULLSTRING) {
+                    if (jsonObject.getString(Constants.J_BID).equals(Constants.NULLSTRING)) {
                         throw new InvalidStockSymbolException(jsonObject.getString(Constants.J_SYMBOL));
                     }
                     batchOperations.add(buildBatchOperation(jsonObject));
@@ -75,10 +78,9 @@ public class Utils {
         String timeStamp;
         try {
             jsonObject = new JSONObject(removeJsonpWrapper(jsonp));
-
-            if (jsonObject != null && jsonObject.length() != 0) {
+          //  if (jsonObject != null && jsonObject.length() != 0) {
+            if (jsonObject.length() != 0) {
                 ChartLabel chartLabels = ChartLabelFactory.create(jsonObject, dateRange);
-                chartLabels.dump();
                 resultsArray = jsonObject.getJSONArray(Constants.J_SERIES);
                 closingValues = jsonObject.getJSONObject(Constants.J_RANGES).getJSONObject(Constants.J_CLOSE);
                 h.setMinPrice(Float.valueOf(closingValues.getString(Constants.J_MIN)));
@@ -139,7 +141,7 @@ public class Utils {
     }
 
     // strip off jsonp wrapper
-    public static String removeJsonpWrapper(String jsonp) {
+    private static String removeJsonpWrapper(String jsonp) {
         return jsonp.substring(jsonp.indexOf("(") + 1, jsonp.lastIndexOf(")"));
     }
 
@@ -193,12 +195,12 @@ public class Utils {
         return time;
     }
 
-    public static String truncateBidPrice(String bidPrice) {
+    private static String truncateBidPrice(String bidPrice) {
         bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
         return bidPrice;
     }
 
-    public static String truncateChange(String change, boolean isPercentChange) {
+    private static String truncateChange(String change, boolean isPercentChange) {
         String weight = change.substring(0, 1);
         String ampersand = "";
         if (isPercentChange) {
@@ -215,7 +217,7 @@ public class Utils {
         return change;
     }
 
-    public static ContentProviderOperation buildBatchOperation(JSONObject jsonObject) {
+    private static ContentProviderOperation buildBatchOperation(JSONObject jsonObject) {
         ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
                 QuoteProvider.Quotes.CONTENT_URI);
         try {
@@ -253,5 +255,11 @@ public class Utils {
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
+    }
+
+    public static void showToast(Context context, String msg) {
+        Toast toast = Toast.makeText(context, msg, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
+        toast.show();
     }
 }

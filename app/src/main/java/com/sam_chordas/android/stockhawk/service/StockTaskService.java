@@ -33,11 +33,11 @@ import java.net.URLEncoder;
  * and is used for the initialization and adding task as well.
  */
 public class StockTaskService extends GcmTaskService {
-    private String TAG = StockTaskService.class.getSimpleName();
+    private static final String TAG = StockTaskService.class.getSimpleName();
 
-    private OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client = new OkHttpClient();
     private Context mContext;
-    private StringBuilder mStoredSymbols = new StringBuilder();
+    private final StringBuilder mStoredSymbols = new StringBuilder();
     private boolean isUpdate;
 
     public StockTaskService() { }
@@ -45,7 +45,7 @@ public class StockTaskService extends GcmTaskService {
         mContext = context;
     }
 
-    String fetchData(String url) throws IOException {
+    private String fetchData(String url) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -71,7 +71,7 @@ public class StockTaskService extends GcmTaskService {
 
         String baseUrl = "http://chartapi.finance.yahoo.com/instrument/1.0/%s/chartdata;type=quote;range=%s/json";
         String finalurl = String.format(baseUrl, stockSymbol, Utils.getRangeFlag(history_range));
-        Log.d(TAG, "Query URL: " + finalurl);
+        //Log.d(TAG, "Query URL: " + finalurl);
 
         HistoryData stockHistory = new HistoryData();
         int result = GcmNetworkManager.RESULT_FAILURE;
@@ -117,7 +117,7 @@ public class StockTaskService extends GcmTaskService {
                     null, null);
 
             // init
-            if (initQueryCursor.getCount() == 0 || initQueryCursor == null) {
+            if (initQueryCursor == null || initQueryCursor.getCount() == 0) {
                 // Init task. Populates DB with quotes for the symbols seen below
                 try {
                     urlStringBuilder.append(
@@ -127,7 +127,7 @@ public class StockTaskService extends GcmTaskService {
                 }
 
             // periodic or refresh
-            } else if (initQueryCursor != null) {
+            } else { //if (initQueryCursor != null) {
                 //DatabaseUtils.dumpCursor(initQueryCursor);
                 initQueryCursor.moveToFirst();
                 for (int i = 0; i < initQueryCursor.getCount(); i++) {
@@ -142,6 +142,8 @@ public class StockTaskService extends GcmTaskService {
                     e.printStackTrace();
                 }
             }
+            if (initQueryCursor != null)
+                initQueryCursor.close();
 
         // add
         } else if (params.getTag().equals(Constants.ADD)) {
@@ -161,8 +163,8 @@ public class StockTaskService extends GcmTaskService {
         String urlString;
         String getResponse;
         int result = GcmNetworkManager.RESULT_FAILURE;
-
-        if (urlStringBuilder != null) {
+// todo comment
+      //  if (urlStringBuilder != null) {
             urlString = urlStringBuilder.toString();
             try {
                 getResponse = fetchData(urlString);
@@ -185,7 +187,7 @@ public class StockTaskService extends GcmTaskService {
                             @Override
                             public void run() {
                                 String msg = mContext.getString(R.string.symbol_not_found);
-                                msg = String.format(msg, ((InvalidStockSymbolException) e).getMessage());
+                                msg = String.format(msg, e.getMessage());
                                 Toast.makeText(mContext.getApplicationContext(), msg, Toast.LENGTH_LONG).show();
                             }
                         });
@@ -194,7 +196,7 @@ public class StockTaskService extends GcmTaskService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+       // }
         return result;
     }
 

@@ -10,7 +10,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
  */
 public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback{
   private final ItemTouchHelperAdapter mAdapter;
-  public static final float ALPHA_FULL = 1.0f;
+  //public static final float ALPHA_FULL = 1.0f;
 
   public SimpleItemTouchHelperCallback(ItemTouchHelperAdapter adapter){
     mAdapter = adapter;

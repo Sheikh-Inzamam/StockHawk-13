@@ -25,7 +25,7 @@ public class HistoryData implements Parcelable {
         mChartEntries.add(item);
     }
 
-    public HistoryItem getItem(int index) {
+    private HistoryItem getItem(int index) {
         return mChartEntries.get(index);
     }
 
@@ -56,7 +56,7 @@ public class HistoryData implements Parcelable {
         }
     }
 
-    public int findMatchingTimestamp(String key, boolean findInRange) {
+    private int findMatchingTimestamp(String key, boolean findInRange) {
         int index = -1;
        // Log.d(TAG, "findMatchingTimestamp start - key: " + key);
         for (int i=0; i < mChartEntries.size(); i++) {
@@ -82,15 +82,14 @@ public class HistoryData implements Parcelable {
         long key = Long.parseLong(keyString);
         long timestamp = Long.parseLong(timeStampString);
         long max = timestamp + 3600;
-        boolean in = inRange(key, timestamp, max);
-        return in;
+        return inRange(key, timestamp, max);
     }
 
     private boolean inRange(long x, long min, long max) {
         return x >= min && x <= max;
     }
 
-    public HistoryData(Parcel in) {
+    private HistoryData(Parcel in) {
         readFromParcel(in);
     }
 

@@ -26,6 +26,7 @@ import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.Constants;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.service.HistoryData;
 import com.sam_chordas.android.stockhawk.service.HistoryItem;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
@@ -33,10 +34,8 @@ import com.sam_chordas.android.stockhawk.service.StockIntentService;
 
 public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    public static final String TAG = DetailActivity.class.getSimpleName();
-    private Intent mServiceIntent;
+    private static final String TAG = DetailActivity.class.getSimpleName();
     private LineChartView mChartView;
-    private Cursor mCursor;
     private static final int DETAILS_CURSOR_LOADER_ID = 0;
     private String mSymbol;
 
@@ -58,24 +57,19 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private RadioButton mHistory1Year;
 
 
-    private BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             int resultCode = intent.getExtras().getInt(Constants.DETAIL_RESULT);
-            if (resultCode != GcmNetworkManager.RESULT_SUCCESS) {
-                // todo report error
-                Log.e(TAG, "Details query failed...");
-                return;
-            }
-
             HistoryData stockHistory = intent.getExtras().getParcelable(Constants.DETAIL_VALUES);
-            if (stockHistory.getItems().isEmpty()) {
-                // todo report error
-                Log.e(TAG, "Details query parsing failed...");
+            if (resultCode != GcmNetworkManager.RESULT_SUCCESS ||
+                    stockHistory != null && stockHistory.getItems().isEmpty())  {
+                Utils.showToast(DetailActivity.this, getString(R.string.network_toast_details_history_failed));
+                Log.e(TAG, "Details history query failed...");
                 return;
             }
 
-            // todo put colors in resources
             Paint gridPaint = new Paint();
             gridPaint.setColor(getResources().getColor(R.color.chart_gridcolor));
             gridPaint.setStyle(Paint.Style.STROKE);
@@ -177,7 +171,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     private void showHistoryChart(String symbol, int range) {
-        mServiceIntent = new Intent(this, StockIntentService.class);
+        Intent mServiceIntent = new Intent(this, StockIntentService.class);
         mServiceIntent.putExtra(Constants.TAG, Constants.DETAILS);
         mServiceIntent.putExtra(Constants.SYMBOL, symbol);
         mServiceIntent.putExtra(Constants.RANGE, range);
@@ -223,8 +217,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mCursor = data;
-        if (mCursor != null) {
+        if (data != null) {
             Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                     new String[]{
                             QuoteColumns._ID,
@@ -246,7 +239,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                     new String[]{mSymbol, "1"},
                     null);
 
-            if (c.getCount() != 0) {
+            if (c != null && c.getCount() != 0) {
                 c.moveToFirst();
                 mName.setText(c.getString(c.getColumnIndex(QuoteColumns.NAME)));
                 String val = c.getString(c.getColumnIndex(QuoteColumns.SYMBOL));
