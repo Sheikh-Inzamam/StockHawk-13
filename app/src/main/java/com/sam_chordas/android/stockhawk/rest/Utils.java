@@ -37,8 +37,8 @@ public class Utils {
 
     public static ArrayList quoteJsonToContentVals(String JSON) {
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
-        JSONObject jsonObject = null;
-        JSONArray resultsArray = null;
+        JSONObject jsonObject;
+        JSONArray resultsArray;
         try {
             jsonObject = new JSONObject(JSON);
             if (jsonObject != null && jsonObject.length() != 0) {
@@ -48,7 +48,7 @@ public class Utils {
                     jsonObject = jsonObject.getJSONObject(Constants.J_RESULTS)
                             .getJSONObject(Constants.J_QUOTE);
                     // validate results - assume that if 'Bid' is 'null' symbol is invalid
-                    if (jsonObject.getString(Constants.J_BID) == "null") {
+                    if (jsonObject.getString(Constants.J_BID) == Constants.NULLSTRING) {
                         throw new InvalidStockSymbolException(jsonObject.getString(Constants.J_SYMBOL));
                     }
                     batchOperations.add(buildBatchOperation(jsonObject));
@@ -69,7 +69,6 @@ public class Utils {
         return batchOperations;
     }
 
-    // todo - test combined intraday and multi day parsing
     public static HistoryData parseHistoryData(String jsonp, int dateRange, HistoryData h) {
         JSONObject jsonObject, closingValues;
         JSONArray resultsArray;
@@ -152,7 +151,6 @@ public class Utils {
     // convert input in form: 20160229 to Day, Month (3 letter abbreviation), Year
     public static String formatLabel(String dateString, String datePattern) {
         String formattedLabel;
-
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             sdf.setTimeZone(TimeZone.getTimeZone(TimeZone.getDefault().getID()));

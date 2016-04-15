@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -129,8 +128,7 @@ public class StockTaskService extends GcmTaskService {
 
             // periodic or refresh
             } else if (initQueryCursor != null) {
-                Log.d(TAG, "------------------- handleQuoteQuery - refresh or periodic");
-                DatabaseUtils.dumpCursor(initQueryCursor);
+                //DatabaseUtils.dumpCursor(initQueryCursor);
                 initQueryCursor.moveToFirst();
                 for (int i = 0; i < initQueryCursor.getCount(); i++) {
                     mStoredSymbols.append("\"" +
@@ -197,7 +195,6 @@ public class StockTaskService extends GcmTaskService {
                 e.printStackTrace();
             }
         }
-
         return result;
     }
 

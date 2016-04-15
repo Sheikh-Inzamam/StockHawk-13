@@ -2,14 +2,12 @@ package com.sam_chordas.android.stockhawk.service;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 
 public class HistoryData implements Parcelable {
-
     private final static String TAG = HistoryData.class.getSimpleName();
     private float mMinPrice;
     private float mMaxPrice;
@@ -60,31 +58,22 @@ public class HistoryData implements Parcelable {
 
     public int findMatchingTimestamp(String key, boolean findInRange) {
         int index = -1;
-
-        Log.d(TAG, "findMatchingTimestamp start - key: " + key);
-
+       // Log.d(TAG, "findMatchingTimestamp start - key: " + key);
         for (int i=0; i < mChartEntries.size(); i++) {
             HistoryItem item = mChartEntries.get(i);
             String timestamp = item.getTimeStamp();
             if (timestamp.equals(key)) {
                 index = i;
-                Log.d(TAG, "findMatchingTimestamp found MATCHING " );
+             //   Log.d(TAG, "findMatchingTimestamp found MATCHING " );
                 break;
             }
             // dont look for timestamp in range if key is date string that is likely to have exact match
             if (findInRange && timeStampInRange(key, timestamp)) {
                 index = i;
-                Log.d(TAG, "findMatchingTimestamp found IN RANGE " );
+              //  Log.d(TAG, "findMatchingTimestamp found IN RANGE " );
                 break;
             }
         }
-       if (index == -1) {
-            Log.d(TAG, "findMatchingTimestamp FAIL - index: " + index + " key: " + key);
-        }
-        else {
-            Log.d(TAG, "findMatchingTimestamp SUCCEED - index: " + index + " key: " + key);
-        }
-
         return index;
     }
 
