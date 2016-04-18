@@ -22,12 +22,10 @@ class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory 
 
     private static final String TAG = WidgetRemoteViewsFactory.class.getSimpleName();
     private final Context mContext;
-    //private int mWidgetId;
     private Cursor mCursor;
 
     public WidgetRemoteViewsFactory(Context context, Intent intent) {
         mContext = context;
-      //  mWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
     }
 
     @Override

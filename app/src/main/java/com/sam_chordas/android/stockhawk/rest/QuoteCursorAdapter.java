@@ -25,10 +25,8 @@ import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperViewHolder;
  */
 public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAdapter.ViewHolder>
         implements ItemTouchHelperAdapter {
-
   private static Context mContext;
   private static Typeface robotoLight;
-  //private boolean isPercent;
 
   public QuoteCursorAdapter(Context context, Cursor cursor) {
     super(context, cursor);
@@ -80,13 +78,6 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     mContext.getContentResolver().delete(QuoteProvider.Quotes.withSymbol(symbol), null, null);
     notifyItemRemoved(position);
   }
-/*
-
-  @Override
-  public int getItemCount() {
-    return super.getItemCount();
-  }
-*/
 
   public String getStockSymbol(int position) {
     Cursor c = getCursor();

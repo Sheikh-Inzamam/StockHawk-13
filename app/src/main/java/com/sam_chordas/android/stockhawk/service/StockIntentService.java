@@ -7,9 +7,6 @@ import android.os.Bundle;
 import com.google.android.gms.gcm.TaskParams;
 import com.sam_chordas.android.stockhawk.data.Constants;
 
-/**
- * Created by sam_chordas on 10/1/15.
- */
 public class StockIntentService extends IntentService {
 
     public StockIntentService() {

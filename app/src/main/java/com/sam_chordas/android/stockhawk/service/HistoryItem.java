@@ -30,10 +30,6 @@ public class HistoryItem implements Parcelable {
     public String getLabel() {
         return mLabel;
     }
-/*
-    public void setPrice(float price) {
-        mClosingPrice = price;
-    }*/
 
     public float getPrice(){
         return mClosingPrice;

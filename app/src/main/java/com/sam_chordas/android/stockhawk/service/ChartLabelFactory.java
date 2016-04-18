@@ -79,7 +79,6 @@ public class ChartLabelFactory {
         }
         catch (JSONException e) {
             Log.e(TAG, "parsing date failed: " + e.getMessage());
-            return labelSet;
         }
 
         return labelSet;

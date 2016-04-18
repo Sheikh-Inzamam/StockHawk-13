@@ -44,7 +44,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
      */
     private CharSequence mTitle;
     private Intent mServiceIntent;
-//    private ItemTouchHelper mItemTouchHelper;
     private static final int CURSOR_LOADER_ID = 0;
     private QuoteCursorAdapter mCursorAdapter;
     private Context mContext;
@@ -123,7 +122,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                 } else {
                     Utils.showToast(mContext, getString(R.string.network_toast_noadd));
                 }
-
             }
         });
 

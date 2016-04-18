@@ -127,8 +127,7 @@ public class StockTaskService extends GcmTaskService {
                 }
 
             // periodic or refresh
-            } else { //if (initQueryCursor != null) {
-                //DatabaseUtils.dumpCursor(initQueryCursor);
+            } else {
                 initQueryCursor.moveToFirst();
                 for (int i = 0; i < initQueryCursor.getCount(); i++) {
                     mStoredSymbols.append("\"" +
@@ -160,43 +159,39 @@ public class StockTaskService extends GcmTaskService {
         urlStringBuilder.append("&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables."
                 + "org%2Falltableswithkeys&callback=");
 
-        String urlString;
-        String getResponse;
         int result = GcmNetworkManager.RESULT_FAILURE;
-// todo comment
-      //  if (urlStringBuilder != null) {
-            urlString = urlStringBuilder.toString();
+        String urlString = urlStringBuilder.toString();
+        try {
+            String getResponse = fetchData(urlString);
+            result = GcmNetworkManager.RESULT_SUCCESS;
             try {
-                getResponse = fetchData(urlString);
-                result = GcmNetworkManager.RESULT_SUCCESS;
-                try {
-                    ContentValues contentValues = new ContentValues();
-                    // update ISCURRENT to 0 (false) so new data is current
-                    if (isUpdate) {
-                        contentValues.put(QuoteColumns.ISCURRENT, 0);
-                        mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
-                                null, null);
-                    }
-                    mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY, Utils.quoteJsonToContentVals(getResponse));
-                } catch (RemoteException | OperationApplicationException | InvalidStockSymbolException e) {
-                    Log.e(TAG, "Error applying batch insert", e);
-                    // if invalid stock symbol show Toast
-                    if (e instanceof InvalidStockSymbolException) {
-                        Handler handler = new Handler(Looper.getMainLooper());
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                String msg = mContext.getString(R.string.symbol_not_found);
-                                msg = String.format(msg, e.getMessage());
-                                Toast.makeText(mContext.getApplicationContext(), msg, Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
+                ContentValues contentValues = new ContentValues();
+                // update ISCURRENT to 0 (false) so new data is current
+                if (isUpdate) {
+                    contentValues.put(QuoteColumns.ISCURRENT, 0);
+                    mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
+                            null, null);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY, Utils.quoteJsonToContentVals(getResponse));
+            } catch (RemoteException | OperationApplicationException | InvalidStockSymbolException e) {
+                Log.e(TAG, "Error applying batch insert", e);
+                // if invalid stock symbol show Toast
+                if (e instanceof InvalidStockSymbolException) {
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            String msg = mContext.getString(R.string.symbol_not_found);
+                            msg = String.format(msg, e.getMessage());
+                            Toast.makeText(mContext.getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
-       // }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return result;
     }
 

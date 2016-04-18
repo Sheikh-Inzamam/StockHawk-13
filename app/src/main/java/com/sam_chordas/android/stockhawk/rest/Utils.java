@@ -28,9 +28,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-/**
- * Created by sam_chordas on 10/8/15.
- */
 public class Utils {
 
     private static final String TAG = Utils.class.getSimpleName();
@@ -43,7 +40,6 @@ public class Utils {
         JSONArray resultsArray;
         try {
             jsonObject = new JSONObject(JSON);
-         //   if (jsonObject != null && jsonObject.length() != 0) {
             if (jsonObject.length() != 0) {
                 jsonObject = jsonObject.getJSONObject(Constants.J_QUERY);
                 int count = Integer.parseInt(jsonObject.getString(Constants.J_COUNT));
@@ -78,7 +74,6 @@ public class Utils {
         String timeStamp;
         try {
             jsonObject = new JSONObject(removeJsonpWrapper(jsonp));
-          //  if (jsonObject != null && jsonObject.length() != 0) {
             if (jsonObject.length() != 0) {
                 ChartLabel chartLabels = ChartLabelFactory.create(jsonObject, dateRange);
                 resultsArray = jsonObject.getJSONArray(Constants.J_SERIES);
