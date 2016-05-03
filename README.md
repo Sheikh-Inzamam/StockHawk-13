@@ -2,6 +2,10 @@
 
 In this project I updated a sample stock ticker app to add stock charting and an app widget to show stock quotes on the device home screen.
 
+![Stock List](screenshots/main-500.png)
+![Details - 1 Day Chart](screenshots/details1d-500.png)
+![1 Year Chart](screenshots/details1y-500.png)
+
 ### Author
 [Dave Allen](https://github.com/debun8)
 
@@ -17,7 +21,7 @@ Apache 2.0 See the LICENSE file for details
 
 ----
 
-## The Assignment 
+## The Assignment
 
 ### What Will I Learn?
 
